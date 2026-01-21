@@ -104,6 +104,7 @@ jobs:
     needs: check-versions
     if: needs.check-versions.outputs.has_updates == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     container:
       image: ghcr.io/${{ github.repository }}/aur-builder:latest
       credentials:
