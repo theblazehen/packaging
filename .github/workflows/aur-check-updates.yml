@@ -185,8 +185,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.LLM_PROXY_API_KEY }}
           github_token: ${{ github.token }}
-          claude_args: "--model antigravity/claude-opus-4-5"
-          settings: ".claude/settings.json"
+          claude_args: |
+            --model antigravity/claude-opus-4-5
+            --allowedTools "Bash(*),Read(*),Write(*),Edit(*),MultiEdit(*)"
           prompt: |
             Update the AUR package `${{ matrix.update.package }}`.
             
