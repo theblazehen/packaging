@@ -19,8 +19,7 @@ RUN pacman -Syu --noconfirm && \
         && \
     pacman -Scc --noconfirm
 
-# Install OpenCode globally
-RUN npm install -g opencode@latest
+RUN curl -fsSL https://opencode.ai/install | bash
 
 # Create builder user (non-root for makepkg)
 RUN useradd -m builder && \
