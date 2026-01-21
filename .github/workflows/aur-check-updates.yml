@@ -42,26 +42,24 @@ jobs:
           python3 << 'PYEOF'
           import json
           import os
+          import tomllib
           
           old_path = '.github/nvchecker/old_ver.json'
           new_path = '.github/nvchecker/new_ver.json'
           
-          # Known package names from nvchecker.toml
-          PACKAGES = {
-              'promptfoo', 'kimaki', 'openchamber', 'ccstatusline', 'claude-code-ui',
-              'bdui-bin', 'code-notify', 'claude-notify', 'xmenu', 'arweave-deploy-bin',
-              'blender-mcp-git', 'lazybeads-git', 'fractalart-git'
-          }
+          # Get package names from nvchecker.toml (skip __config__)
+          with open('nvchecker.toml', 'rb') as f:
+              config = tomllib.load(f)
+          PACKAGES = {k for k in config.keys() if not k.startswith('__')}
           
           old = json.load(open(old_path)) if os.path.exists(old_path) else {}
           new_raw = json.load(open(new_path)) if os.path.exists(new_path) else {}
           
           # nvchecker output may have nested format or flat format
-          # Handle both: {"pkg": "ver"} or {"pkg": {"version": "ver"}}
           new = {}
           for k, v in new_raw.items():
               if k not in PACKAGES:
-                  continue  # Skip metadata keys like 'version', 'data'
+                  continue
               if isinstance(v, dict):
                   new[k] = v.get('version', v.get('value', str(v)))
               else:
