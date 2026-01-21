@@ -218,7 +218,7 @@ jobs:
           - Create GitHub Issue with error details, label: `build-failure`
           PROMPT_EOF
           
-          opencode -p llmproxy -m antigravity/claude-opus-4-5 --no-input < /tmp/prompt.md
+          opencode run "$(cat /tmp/prompt.md)"
 
   update-state:
     needs: [check-versions, prepare-updates]
