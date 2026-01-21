@@ -178,11 +178,17 @@ jobs:
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
       
+      - name: Configure OpenCode auth
+        run: |
+          mkdir -p ~/.local/share/opencode
+          cat > ~/.local/share/opencode/auth.json << 'EOF'
+          {
+            "llmproxy": "${{ secrets.LLM_PROXY_API_KEY }}"
+          }
+          EOF
+      
       - name: Run OpenCode to prepare update
         uses: anomalyco/opencode/github@latest
-        env:
-          OPENAI_BASE_URL: https://llmapi.llm.blazelight.dev/v1
-          OPENAI_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
         with:
           model: llmproxy/antigravity/claude-opus-4-5
           prompt: |
