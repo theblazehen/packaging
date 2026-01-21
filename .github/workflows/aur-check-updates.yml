@@ -52,18 +52,16 @@ jobs:
               config = tomllib.load(f)
           PACKAGES = {k for k in config.keys() if not k.startswith('__')}
           
-          old = json.load(open(old_path)) if os.path.exists(old_path) else {}
-          new_raw = json.load(open(new_path)) if os.path.exists(new_path) else {}
+          def parse_nvchecker_json(path):
+              """Parse nvchecker JSON: {"version": 2, "data": {"pkg": {"version": "1.0", ...}}}"""
+              if not os.path.exists(path):
+                  return {}
+              raw = json.load(open(path))
+              data = raw.get('data', {})
+              return {k: v['version'] for k, v in data.items() if k in PACKAGES}
           
-          # nvchecker output may have nested format or flat format
-          new = {}
-          for k, v in new_raw.items():
-              if k not in PACKAGES:
-                  continue
-              if isinstance(v, dict):
-                  new[k] = v.get('version', v.get('value', str(v)))
-              else:
-                  new[k] = v
+          old = parse_nvchecker_json(old_path)
+          new = parse_nvchecker_json(new_path)
           
           updates = []
           for pkg, new_ver in new.items():
