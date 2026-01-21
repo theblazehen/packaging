@@ -119,9 +119,12 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Setup workspace
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           sudo chown -R builder:builder .
+          sed -i "s/PLACEHOLDER_API_KEY/$LLM_API_KEY/" /home/builder/.config/opencode/config.json
       
       - name: Fetch changelog
         id: changelog
