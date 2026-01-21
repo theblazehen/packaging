@@ -9,6 +9,12 @@ on:
         description: 'Force check specific package (leave empty for all)'
         required: false
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
 jobs:
   check-versions:
     runs-on: ubuntu-latest
@@ -40,15 +46,33 @@ jobs:
           old_path = '.github/nvchecker/old_ver.json'
           new_path = '.github/nvchecker/new_ver.json'
           
+          # Known package names from nvchecker.toml
+          PACKAGES = {
+              'promptfoo', 'kimaki', 'openchamber', 'ccstatusline', 'claude-code-ui',
+              'bdui-bin', 'code-notify', 'claude-notify', 'xmenu', 'arweave-deploy-bin',
+              'blender-mcp-git', 'lazybeads-git', 'fractalart-git'
+          }
+          
           old = json.load(open(old_path)) if os.path.exists(old_path) else {}
-          new = json.load(open(new_path)) if os.path.exists(new_path) else {}
+          new_raw = json.load(open(new_path)) if os.path.exists(new_path) else {}
+          
+          # nvchecker output may have nested format or flat format
+          # Handle both: {"pkg": "ver"} or {"pkg": {"version": "ver"}}
+          new = {}
+          for k, v in new_raw.items():
+              if k not in PACKAGES:
+                  continue  # Skip metadata keys like 'version', 'data'
+              if isinstance(v, dict):
+                  new[k] = v.get('version', v.get('value', str(v)))
+              else:
+                  new[k] = v
           
           updates = []
           for pkg, new_ver in new.items():
               old_ver = old.get(pkg)
-              # For -git packages, compare short hash (last 7 chars)
+              # For -git packages, compare short hash (first 7 chars)
               if pkg.endswith('-git'):
-                  old_short = old_ver[-7:] if old_ver else None
+                  old_short = old_ver[:7] if old_ver else None
                   new_short = new_ver[:7] if new_ver else None
                   if old_short != new_short:
                       updates.append({

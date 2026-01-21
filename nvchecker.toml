@@ -72,11 +72,14 @@ prefix = "v"
 [blender-mcp-git]
 source = "git"
 git = "https://github.com/ahujasid/blender-mcp.git"
+use_commit = true
 
 [lazybeads-git]
 source = "git"
 git = "https://github.com/codegangsta/lazybeads.git"
+use_commit = true
 
 [fractalart-git]
 source = "git"
 git = "https://github.com/TomSmeets/FractalArt.git"
+use_commit = true
