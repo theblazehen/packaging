@@ -20,7 +20,7 @@ RUN pacman -Syu --noconfirm && \
     pacman -Scc --noconfirm
 
 RUN curl -fsSL https://opencode.ai/install | bash && \
-    mv /root/.local/bin/opencode /usr/local/bin/opencode
+    mv /root/.opencode/bin/opencode /usr/local/bin/opencode
 
 # Create builder user (non-root for makepkg)
 RUN useradd -m builder && \
