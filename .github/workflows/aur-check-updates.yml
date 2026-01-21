@@ -129,7 +129,7 @@ jobs:
           cat > .opencode/opencode.json << EOF
           {
             "\$schema": "https://opencode.ai/config.json",
-            "permission": {"bash": "allow", "external_directory": ["/home*", "/tmp*"]},
+            "permission": {"bash": "allow", "external_directory": {"*": "allow"}},
             "provider": {
               "llmproxy": {
                 "npm": "@ai-sdk/openai-compatible",
