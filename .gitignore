@@ -1,0 +1,20 @@
+# Build artifacts
+*.pkg.tar
+*.pkg.tar.zst
+*.pkg.tar.xz
+*.pkg.tar.gz
+*.tgz
+*.tar.gz
+
+# makepkg directories
+pkg/
+src/
+
+# npm cache
+npm-cache/
+
+# nvchecker generated file (we only track old_ver.json)
+.github/nvchecker/new_ver.json
+
+# Nested AUR git repos - we track files directly, not as submodules
+aur/*/.git/

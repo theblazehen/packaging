@@ -1,0 +1,82 @@
+# nvchecker configuration for AUR package version tracking
+# https://nvchecker.readthedocs.io/
+
+[__config__]
+oldver = ".github/nvchecker/old_ver.json"
+newver = ".github/nvchecker/new_ver.json"
+
+# ═══════════════════════════════════════════════════════════════════
+# NPM Packages
+# ═══════════════════════════════════════════════════════════════════
+
+[promptfoo]
+source = "npm"
+npm = "promptfoo"
+
+[kimaki]
+source = "npm"
+npm = "kimaki"
+
+[openchamber]
+source = "npm"
+npm = "@openchamber/web"
+
+[ccstatusline]
+source = "npm"
+npm = "ccstatusline"
+
+[claude-code-ui]
+source = "npm"
+npm = "@siteboon/claude-code-ui"
+
+# ═══════════════════════════════════════════════════════════════════
+# GitHub Releases
+# ═══════════════════════════════════════════════════════════════════
+
+[bdui-bin]
+source = "github"
+github = "assimelha/bdui"
+use_latest_release = true
+prefix = "v"
+
+[code-notify]
+source = "github"
+github = "mylee04/code-notify"
+use_latest_release = true
+prefix = "v"
+
+[claude-notify]
+source = "github"
+github = "mylee04/claude-notify"
+use_latest_release = true
+prefix = "v"
+
+[xmenu]
+source = "github"
+github = "phillbush/xmenu"
+use_max_tag = true
+prefix = "v"
+
+[arweave-deploy-bin]
+source = "github"
+github = "ArweaveTeam/arweave-deploy"
+use_max_tag = true
+prefix = "v"
+
+# ═══════════════════════════════════════════════════════════════════
+# Git HEAD (-git packages)
+# Version format from pkgver(): r<count>.<shorthash>
+# nvchecker returns full commit hash, we compare short hash portion
+# ═══════════════════════════════════════════════════════════════════
+
+[blender-mcp-git]
+source = "git"
+git = "https://github.com/ahujasid/blender-mcp.git"
+
+[lazybeads-git]
+source = "git"
+git = "https://github.com/codegangsta/lazybeads.git"
+
+[fractalart-git]
+source = "git"
+git = "https://github.com/TomSmeets/FractalArt.git"

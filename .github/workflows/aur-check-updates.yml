@@ -1,0 +1,268 @@
+name: AUR Package Update Check
+
+on:
+  schedule:
+    - cron: "0 9 * * *"  # Daily at 9am UTC
+  workflow_dispatch:
+    inputs:
+      force_package:
+        description: 'Force check specific package (leave empty for all)'
+        required: false
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      updates: ${{ steps.detect.outputs.updates }}
+      has_updates: ${{ steps.detect.outputs.has_updates }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install nvchecker
+        run: pip install nvchecker
+      
+      - name: Run nvchecker
+        run: nvchecker -c nvchecker.toml
+      
+      - name: Detect updates
+        id: detect
+        run: |
+          python3 << 'PYEOF'
+          import json
+          import os
+          
+          old_path = '.github/nvchecker/old_ver.json'
+          new_path = '.github/nvchecker/new_ver.json'
+          
+          old = json.load(open(old_path)) if os.path.exists(old_path) else {}
+          new = json.load(open(new_path)) if os.path.exists(new_path) else {}
+          
+          updates = []
+          for pkg, new_ver in new.items():
+              old_ver = old.get(pkg)
+              # For -git packages, compare short hash (last 7 chars)
+              if pkg.endswith('-git'):
+                  old_short = old_ver[-7:] if old_ver else None
+                  new_short = new_ver[:7] if new_ver else None
+                  if old_short != new_short:
+                      updates.append({
+                          "package": pkg,
+                          "old_version": old_ver or "unknown",
+                          "new_version": new_ver[:7],
+                          "full_new_hash": new_ver,
+                          "type": "git"
+                      })
+              elif old_ver != new_ver:
+                  updates.append({
+                      "package": pkg,
+                      "old_version": old_ver or "unknown",
+                      "new_version": new_ver,
+                      "type": "release"
+                  })
+          
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"updates={json.dumps(updates)}\n")
+              f.write(f"has_updates={'true' if updates else 'false'}\n")
+          
+          print(f"Found {len(updates)} updates: {[u['package'] for u in updates]}")
+          PYEOF
+      
+      - name: Upload nvchecker state
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvchecker-state
+          path: .github/nvchecker/new_ver.json
+
+  prepare-updates:
+    needs: check-versions
+    if: needs.check-versions.outputs.has_updates == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    strategy:
+      matrix:
+        update: ${{ fromJson(needs.check-versions.outputs.updates) }}
+      fail-fast: false
+      max-parallel: 2
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Arch build tools
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git openssh npm pacman-contrib jq github-cli
+          
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          chown -R builder:builder .
+      
+      - name: Fetch changelog
+        id: changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pkg="${{ matrix.update.package }}"
+          old_ver="${{ matrix.update.old_version }}"
+          new_ver="${{ matrix.update.new_version }}"
+          update_type="${{ matrix.update.type }}"
+          
+          changelog=""
+          
+          if [ "$update_type" = "git" ]; then
+            # For -git packages, get commit log
+            upstream_url=$(grep -A1 "^\[${pkg}\]" nvchecker.toml | grep "^git = " | cut -d'"' -f2)
+            if [ -n "$upstream_url" ]; then
+              git clone --bare "$upstream_url" /tmp/upstream 2>/dev/null || true
+              if [ -d /tmp/upstream ]; then
+                cd /tmp/upstream
+                changelog=$(git log --oneline ${old_ver}..${new_ver} 2>/dev/null | head -20 || echo "Unable to fetch commit log")
+                cd -
+              fi
+            fi
+          else
+            # For GitHub releases, try to get release notes
+            upstream_repo=$(grep -A1 "^\[${pkg}\]" nvchecker.toml | grep "^github = " | cut -d'"' -f2)
+            if [ -n "$upstream_repo" ]; then
+              changelog=$(gh release view "v${new_ver}" --repo "$upstream_repo" --json body -q .body 2>/dev/null || \
+                          gh release view "${new_ver}" --repo "$upstream_repo" --json body -q .body 2>/dev/null || \
+                          echo "")
+            fi
+            
+            # For npm packages without GitHub releases, link to npm
+            if [ -z "$changelog" ]; then
+              npm_pkg=$(grep -A1 "^\[${pkg}\]" nvchecker.toml | grep "^npm = " | cut -d'"' -f2)
+              if [ -n "$npm_pkg" ]; then
+                changelog="See: https://www.npmjs.com/package/${npm_pkg}"
+                # Try to find CHANGELOG in repo
+                repo_url=$(npm view "$npm_pkg" repository.url 2>/dev/null | sed 's/git+//' | sed 's/\.git$//')
+                if [ -n "$repo_url" ]; then
+                  changelog="${changelog}\nRepo: ${repo_url}"
+                fi
+              fi
+            fi
+          fi
+          
+          # Write to output (handle multiline)
+          {
+            echo "changelog<<CHANGELOG_EOF"
+            echo "$changelog"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+      
+      - name: Run OpenCode to prepare update
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENAI_BASE_URL: https://llmapi.llm.blazelight.dev/v1
+          OPENAI_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
+        with:
+          model: llmproxy/antigravity/claude-opus-4-5
+          prompt: |
+            Update the AUR package `${{ matrix.update.package }}`.
+            
+            ## Version Change
+            ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
+            
+            ## Changelog
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ---
+            
+            ## Instructions
+            
+            1. **Read** `aur/${{ matrix.update.package }}/AGENTS.md` for package-specific steps
+            
+            2. **Update PKGBUILD**:
+               - For regular packages: Set `pkgver=${{ matrix.update.new_version }}` and `pkgrel=1`
+               - For `-git` packages: The `pkgver()` function auto-updates on build
+            
+            3. **Update checksums**:
+               ```bash
+               cd aur/${{ matrix.update.package }}
+               sudo -u builder updpkgsums
+               ```
+            
+            4. **Build and observe**:
+               ```bash
+               sudo -u builder makepkg -sf
+               ```
+               Note any errors or warnings that might need a heads-up in package news.
+            
+            5. **Install and smoke test**:
+               ```bash
+               sudo -u builder makepkg -si --noconfirm
+               ```
+               Run any verification commands from AGENTS.md (e.g., `--version`, `--help`).
+               Note if anything seems broken.
+            
+            6. **Generate .SRCINFO**:
+               ```bash
+               sudo -u builder makepkg --printsrcinfo > .SRCINFO
+               ```
+            
+            7. **Update version state**:
+               Edit `.github/nvchecker/old_ver.json`:
+               - For regular packages: set `"${{ matrix.update.package }}": "${{ matrix.update.new_version }}"`
+               - For -git packages: set to the new short hash `"${{ matrix.update.new_version }}"`
+            
+            ---
+            
+            ## Decision
+            
+            **If build succeeded with no concerning errors/warnings:**
+            - Commit: `${{ matrix.update.package }}: update to ${{ matrix.update.new_version }}`
+            - Create PR titled: `Update ${{ matrix.update.package }} to ${{ matrix.update.new_version }}`
+            - PR body should include:
+              - Changelog (above)
+              - Build highlights (clean, or any notable warnings)
+              - Smoke test results
+            
+            **If build failed or has warnings needing attention:**
+            - DO NOT commit or create PR
+            - Create GitHub Issue titled: `${{ matrix.update.package }} ${{ matrix.update.new_version }}: <brief problem>`
+            - Issue body should include:
+              - Changelog (above)  
+              - What went wrong (highlights from logs)
+            - Label: `build-failure`
+
+  update-state:
+    needs: [check-versions, prepare-updates]
+    if: always() && needs.check-versions.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download nvchecker state
+        uses: actions/download-artifact@v4
+        with:
+          name: nvchecker-state
+          path: .github/nvchecker/
+        continue-on-error: true
+      
+      - name: Commit version state if no updates were processed
+        run: |
+          if [ -f .github/nvchecker/new_ver.json ]; then
+            # Only update state file, PRs handle their own state updates
+            if [ "${{ needs.check-versions.outputs.has_updates }}" != "true" ]; then
+              cp .github/nvchecker/new_ver.json .github/nvchecker/old_ver.json
+              
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              
+              git add .github/nvchecker/old_ver.json
+              
+              if ! git diff --staged --quiet; then
+                git commit -m "chore: update nvchecker version state"
+                git push
+              fi
+            fi
+          fi

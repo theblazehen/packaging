@@ -1,0 +1,90 @@
+name: Push to AUR
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - 'aur/**/PKGBUILD'
+      - 'aur/**/.SRCINFO'
+
+jobs:
+  push-to-aur:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup SSH for AUR
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
+          
+          cat >> ~/.ssh/config << 'EOF'
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            User aur
+            IdentitiesOnly yes
+          EOF
+
+      - name: Determine changed packages
+        id: changed
+        run: |
+          packages=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
+            | grep '^aur/' \
+            | cut -d/ -f2 \
+            | sort -u \
+            | tr '\n' ' ')
+          echo "packages=$packages" >> $GITHUB_OUTPUT
+          echo "Changed packages: $packages"
+
+      - name: Push to AUR
+        run: |
+          for pkg in ${{ steps.changed.outputs.packages }}; do
+            echo "═══════════════════════════════════════════════"
+            echo "Pushing $pkg to AUR..."
+            echo "═══════════════════════════════════════════════"
+            
+            cd aur/$pkg
+            
+            git clone ssh://aur@aur.archlinux.org/$pkg.git ../aur-$pkg-temp 2>/dev/null || {
+              echo "New package, initializing..."
+              mkdir -p ../aur-$pkg-temp
+              cd ../aur-$pkg-temp
+              git init --initial-branch=master
+              git remote add origin ssh://aur@aur.archlinux.org/$pkg.git
+              cd -
+            }
+            
+            cp PKGBUILD .SRCINFO ../aur-$pkg-temp/
+            cd ../aur-$pkg-temp
+            
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            
+            git add PKGBUILD .SRCINFO
+            
+            COMMIT_MSG=$(git -C "$GITHUB_WORKSPACE" log --format=%s -1 ${{ github.sha }})
+            
+            if ! git diff --staged --quiet; then
+              git commit -m "$COMMIT_MSG"
+              git push origin master
+              echo "✅ Successfully pushed $pkg to AUR"
+            else
+              echo "⏭️ No changes to push for $pkg"
+            fi
+            
+            cd "$GITHUB_WORKSPACE"
+          done
+
+      - name: Summary
+        run: |
+          echo "## AUR Push Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for pkg in ${{ steps.changed.outputs.packages }}; do
+            echo "- [$pkg](https://aur.archlinux.org/packages/$pkg)" >> $GITHUB_STEP_SUMMARY
+          done
