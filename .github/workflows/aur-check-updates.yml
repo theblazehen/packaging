@@ -188,7 +188,7 @@ jobs:
           ANTHROPIC_BASE_URL: https://llmapi.llm.blazelight.dev/
           GH_TOKEN: ${{ github.token }}
         run: |
-          cat << 'PROMPT_EOF' | claude --print --dangerously-skip-permissions --model antigravity/claude-opus-4-5 -p -
+          cat << 'PROMPT_EOF' | sudo -u builder -E claude --print --dangerously-skip-permissions --model antigravity/claude-opus-4-5 -p -
           Update the AUR package `${{ matrix.update.package }}`.
           
           ## Version Change
