@@ -117,7 +117,7 @@ jobs:
       - name: Install Arch build tools
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git openssh npm pacman-contrib jq github-cli
+          pacman -S --noconfirm base-devel git openssh npm pacman-contrib jq github-cli unzip
           
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
@@ -178,80 +178,84 @@ jobs:
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
       
+      - name: Install Claude CLI
+        run: |
+          npm install -g @anthropic-ai/claude-code
+      
       - name: Run Claude to prepare update
-        uses: anthropics/claude-code-action@v1
         env:
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.LLM_PROXY_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
           ANTHROPIC_BASE_URL: https://llmapi.llm.blazelight.dev/
-        with:
-          model: antigravity/claude-opus-4-5
-          direct_prompt: |
-            Update the AUR package `${{ matrix.update.package }}`.
-            
-            ## Version Change
-            ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
-            
-            ## Changelog
-            ${{ steps.changelog.outputs.changelog }}
-            
-            ---
-            
-            ## Instructions
-            
-            1. **Read** `aur/${{ matrix.update.package }}/AGENTS.md` for package-specific steps
-            
-            2. **Update PKGBUILD**:
-               - For regular packages: Set `pkgver=${{ matrix.update.new_version }}` and `pkgrel=1`
-               - For `-git` packages: The `pkgver()` function auto-updates on build
-            
-            3. **Update checksums**:
-               ```bash
-               cd aur/${{ matrix.update.package }}
-               sudo -u builder updpkgsums
-               ```
-            
-            4. **Build and observe**:
-               ```bash
-               sudo -u builder makepkg -sf
-               ```
-               Note any errors or warnings that might need a heads-up in package news.
-            
-            5. **Install and smoke test**:
-               ```bash
-               sudo -u builder makepkg -si --noconfirm
-               ```
-               Run any verification commands from AGENTS.md (e.g., `--version`, `--help`).
-               Note if anything seems broken.
-            
-            6. **Generate .SRCINFO**:
-               ```bash
-               sudo -u builder makepkg --printsrcinfo > .SRCINFO
-               ```
-            
-            7. **Update version state**:
-               Edit `.github/nvchecker/old_ver.json`:
-               - For regular packages: set `"${{ matrix.update.package }}": "${{ matrix.update.new_version }}"`
-               - For -git packages: set to the new short hash `"${{ matrix.update.new_version }}"`
-            
-            ---
-            
-            ## Decision
-            
-            **If build succeeded with no concerning errors/warnings:**
-            - Commit: `${{ matrix.update.package }}: update to ${{ matrix.update.new_version }}`
-            - Create PR titled: `Update ${{ matrix.update.package }} to ${{ matrix.update.new_version }}`
-            - PR body should include:
-              - Changelog (above)
-              - Build highlights (clean, or any notable warnings)
-              - Smoke test results
-            
-            **If build failed or has warnings needing attention:**
-            - DO NOT commit or create PR
-            - Create GitHub Issue titled: `${{ matrix.update.package }} ${{ matrix.update.new_version }}: <brief problem>`
-            - Issue body should include:
-              - Changelog (above)  
-              - What went wrong (highlights from logs)
-            - Label: `build-failure`
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat << 'PROMPT_EOF' | claude --print --dangerously-skip-permissions --model antigravity/claude-opus-4-5 -p -
+          Update the AUR package `${{ matrix.update.package }}`.
+          
+          ## Version Change
+          ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
+          
+          ## Changelog
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ---
+          
+          ## Instructions
+          
+          1. **Read** `aur/${{ matrix.update.package }}/AGENTS.md` for package-specific steps
+          
+          2. **Update PKGBUILD**:
+             - For regular packages: Set `pkgver=${{ matrix.update.new_version }}` and `pkgrel=1`
+             - For `-git` packages: The `pkgver()` function auto-updates on build
+          
+          3. **Update checksums**:
+             ```bash
+             cd aur/${{ matrix.update.package }}
+             sudo -u builder updpkgsums
+             ```
+          
+          4. **Build and observe**:
+             ```bash
+             sudo -u builder makepkg -sf
+             ```
+             Note any errors or warnings that might need a heads-up in package news.
+          
+          5. **Install and smoke test**:
+             ```bash
+             sudo -u builder makepkg -si --noconfirm
+             ```
+             Run any verification commands from AGENTS.md (e.g., `--version`, `--help`).
+             Note if anything seems broken.
+          
+          6. **Generate .SRCINFO**:
+             ```bash
+             sudo -u builder makepkg --printsrcinfo > .SRCINFO
+             ```
+          
+          7. **Update version state**:
+             Edit `.github/nvchecker/old_ver.json`:
+             - For regular packages: set `"${{ matrix.update.package }}": "${{ matrix.update.new_version }}"`
+             - For -git packages: set to the new short hash `"${{ matrix.update.new_version }}"`
+          
+          ---
+          
+          ## Decision
+          
+          **If build succeeded with no concerning errors/warnings:**
+          - Commit: `${{ matrix.update.package }}: update to ${{ matrix.update.new_version }}`
+          - Create PR titled: `Update ${{ matrix.update.package }} to ${{ matrix.update.new_version }}`
+          - PR body should include:
+            - Changelog (above)
+            - Build highlights (clean, or any notable warnings)
+            - Smoke test results
+          
+          **If build failed or has warnings needing attention:**
+          - DO NOT commit or create PR
+          - Create GitHub Issue titled: `${{ matrix.update.package }} ${{ matrix.update.new_version }}: <brief problem>`
+          - Issue body should include:
+            - Changelog (above)  
+            - What went wrong (highlights from logs)
+          - Label: `build-failure`
+          PROMPT_EOF
 
   update-state:
     needs: [check-versions, prepare-updates]
