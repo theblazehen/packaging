@@ -3,12 +3,16 @@
   "autoBash": true,
   "autoEdit": true,
   "autoRead": true,
+  "permission": {
+    "bash": "allow"
+  },
   "provider": {
     "llmproxy": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "LLM Proxy",
       "options": {
-        "baseURL": "https://llmapi.llm.blazelight.dev/v1"
+        "baseURL": "https://llmapi.llm.blazelight.dev/v1",
+        "apiKey": "PLACEHOLDER_API_KEY"
       },
       "models": {
         "antigravity/claude-opus-4-5": {

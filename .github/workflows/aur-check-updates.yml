@@ -173,7 +173,7 @@ jobs:
       
       - name: Run OpenCode to prepare update
         env:
-          OPENAI_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: |
