@@ -33,12 +33,11 @@ RUN mkdir -p /home/builder/.ssh && \
     chmod 600 /home/builder/.ssh/config && \
     chown -R builder:builder /home/builder/.ssh
 
-# Setup OpenCode config directory
-RUN mkdir -p /home/builder/.config/opencode && \
+RUN mkdir -p /home/builder/.config/opencode /root/.config/opencode && \
     chown -R builder:builder /home/builder/.config
 
-# Copy OpenCode settings (auto-approve tools)
-COPY --chown=builder:builder opencode-config.json /home/builder/.config/opencode/config.json
+COPY --chown=builder:builder opencode-config.json /home/builder/.config/opencode/opencode.json
+COPY opencode-config.json /root/.config/opencode/opencode.json
 
 # Setup git config for commits
 RUN git config --system user.name "AUR Bot" && \

@@ -124,9 +124,26 @@ jobs:
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           sudo chown -R builder:builder .
-          mkdir -p /root/.config/opencode
-          cp /home/builder/.config/opencode/config.json /root/.config/opencode/config.json
-          sed -i "s/PLACEHOLDER_API_KEY/$LLM_API_KEY/" /root/.config/opencode/config.json
+          mkdir -p .opencode
+          cat > .opencode/opencode.json << EOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "permission": {"bash": "allow"},
+            "provider": {
+              "llmproxy": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "LLM Proxy",
+                "options": {
+                  "baseURL": "https://llmapi.llm.blazelight.dev/v1",
+                  "apiKey": "$LLM_API_KEY"
+                },
+                "models": {
+                  "antigravity/claude-opus-4-5": {"name": "Claude Opus 4.5", "limit": {"context": 200000, "output": 64000}}
+                }
+              }
+            }
+          }
+          EOF
       
       - name: Fetch changelog
         id: changelog
