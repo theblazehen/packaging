@@ -47,7 +47,6 @@ RUN git config --system user.name "AUR Bot" && \
 # Entrypoint script for runtime setup
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
 
-USER builder
 WORKDIR /workspace
 
 ENTRYPOINT ["/entrypoint.sh"]
