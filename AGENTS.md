@@ -4,7 +4,7 @@ This workspace manages packaging for various distribution channels.
 
 ## Structure
 - `aur/`: Arch User Repository packages
-- `docker/`: Docker container images (planned)
+- `docker/aur-builder/`: Container image with OpenCode + Arch build tools
 - `nvchecker.toml`: Version checking configuration
 - `.github/workflows/`: Automated update workflows
 

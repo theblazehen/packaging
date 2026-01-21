@@ -104,7 +104,10 @@ jobs:
     if: needs.check-versions.outputs.has_updates == 'true'
     runs-on: ubuntu-latest
     container:
-      image: archlinux:latest
+      image: ghcr.io/${{ github.repository }}/aur-builder:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
         update: ${{ fromJson(needs.check-versions.outputs.updates) }}
@@ -114,16 +117,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install Arch build tools
+      - name: Setup workspace
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git openssh npm pacman-contrib jq github-cli unzip
-          
-          useradd -m builder
-          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-          
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          chown -R builder:builder .
+          sudo chown -R builder:builder .
       
       - name: Fetch changelog
         id: changelog
@@ -138,7 +135,6 @@ jobs:
           changelog=""
           
           if [ "$update_type" = "git" ]; then
-            # For -git packages, get commit log
             upstream_url=$(grep -A1 "^\[${pkg}\]" nvchecker.toml | grep "^git = " | cut -d'"' -f2)
             if [ -n "$upstream_url" ]; then
               git clone --bare "$upstream_url" /tmp/upstream 2>/dev/null || true
@@ -149,7 +145,6 @@ jobs:
               fi
             fi
           else
-            # For GitHub releases, try to get release notes
             upstream_repo=$(grep -A1 "^\[${pkg}\]" nvchecker.toml | grep "^github = " | cut -d'"' -f2)
             if [ -n "$upstream_repo" ]; then
               changelog=$(gh release view "v${new_ver}" --repo "$upstream_repo" --json body -q .body 2>/dev/null || \
@@ -157,12 +152,10 @@ jobs:
                           echo "")
             fi
             
-            # For npm packages without GitHub releases, link to npm
             if [ -z "$changelog" ]; then
               npm_pkg=$(grep -A1 "^\[${pkg}\]" nvchecker.toml | grep "^npm = " | cut -d'"' -f2)
               if [ -n "$npm_pkg" ]; then
                 changelog="See: https://www.npmjs.com/package/${npm_pkg}"
-                # Try to find CHANGELOG in repo
                 repo_url=$(npm view "$npm_pkg" repository.url 2>/dev/null | sed 's/git+//' | sed 's/\.git$//')
                 if [ -n "$repo_url" ]; then
                   changelog="${changelog}\nRepo: ${repo_url}"
@@ -171,20 +164,19 @@ jobs:
             fi
           fi
           
-          # Write to output (handle multiline)
           {
             echo "changelog<<CHANGELOG_EOF"
             echo "$changelog"
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
       
-      - name: Install Claude Code CLI
+      - name: Run OpenCode to prepare update
+        env:
+          OPENAI_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          npm install -g @anthropic-ai/claude-code
-          
-      - name: Create prompt file
-        run: |
-          cat > /tmp/claude-prompt.md << 'PROMPT_EOF'
+          cat > /tmp/prompt.md << 'PROMPT_EOF'
           Update the AUR package `${{ matrix.update.package }}`.
           
           ## Version Change
@@ -203,70 +195,29 @@ jobs:
              - For regular packages: Set `pkgver=${{ matrix.update.new_version }}` and `pkgrel=1`
              - For `-git` packages: The `pkgver()` function auto-updates on build
           
-          3. **Update checksums**:
-             ```bash
-             cd aur/${{ matrix.update.package }}
-             sudo -u builder updpkgsums
-             ```
+          3. **Update checksums**: Run `updpkgsums` in the package directory
           
-          4. **Build and observe**:
-             ```bash
-             sudo -u builder makepkg -sf
-             ```
-             Note any errors or warnings that might need a heads-up in package news.
+          4. **Build**: Run `makepkg -sf` and note any errors/warnings
           
-          5. **Install and smoke test**:
-             ```bash
-             sudo -u builder makepkg -si --noconfirm
-             ```
-             Run any verification commands from AGENTS.md (e.g., `--version`, `--help`).
-             Note if anything seems broken.
+          5. **Install and smoke test**: Run `makepkg -si --noconfirm` and verify with commands from AGENTS.md
           
-          6. **Generate .SRCINFO**:
-             ```bash
-             sudo -u builder makepkg --printsrcinfo > .SRCINFO
-             ```
+          6. **Generate .SRCINFO**: Run `makepkg --printsrcinfo > .SRCINFO`
           
-          7. **Update version state**:
-             Edit `.github/nvchecker/old_ver.json`:
-             - For regular packages: set `"${{ matrix.update.package }}": "${{ matrix.update.new_version }}"`
-             - For -git packages: set to the new short hash `"${{ matrix.update.new_version }}"`
+          7. **Update version state** in `.github/nvchecker/old_ver.json`
           
           ---
           
           ## Decision
           
-          **If build succeeded with no concerning errors/warnings:**
+          **If build succeeded:**
           - Commit: `${{ matrix.update.package }}: update to ${{ matrix.update.new_version }}`
-          - Create PR titled: `Update ${{ matrix.update.package }} to ${{ matrix.update.new_version }}`
-          - PR body should include:
-            - Changelog (above)
-            - Build highlights (clean, or any notable warnings)
-            - Smoke test results
+          - Create PR with changelog, build highlights, smoke test results
           
-          **If build failed or has warnings needing attention:**
-          - DO NOT commit or create PR
-          - Create GitHub Issue titled: `${{ matrix.update.package }} ${{ matrix.update.new_version }}: <brief problem>`
-          - Issue body should include:
-            - Changelog (above)  
-            - What went wrong (highlights from logs)
-          - Label: `build-failure`
+          **If build failed:**
+          - Create GitHub Issue with error details, label: `build-failure`
           PROMPT_EOF
           
-          chown builder:builder /tmp/claude-prompt.md
-          
-      - name: Run Claude to prepare update
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
-          ANTHROPIC_BASE_URL: https://llmapi.llm.blazelight.dev/
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Run claude as builder user (non-root) so --dangerously-skip-permissions works
-          sudo -E -u builder claude \
-            --model antigravity/claude-opus-4-5 \
-            --dangerously-skip-permissions \
-            --print \
-            -p "$(cat /tmp/claude-prompt.md)"
+          opencode -p llmproxy -m antigravity/claude-opus-4-5 --no-input < /tmp/prompt.md
 
   update-state:
     needs: [check-versions, prepare-updates]
