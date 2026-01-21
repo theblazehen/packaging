@@ -124,7 +124,9 @@ jobs:
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           sudo chown -R builder:builder .
-          sed -i "s/PLACEHOLDER_API_KEY/$LLM_API_KEY/" /home/builder/.config/opencode/config.json
+          mkdir -p /root/.config/opencode
+          cp /home/builder/.config/opencode/config.json /root/.config/opencode/config.json
+          sed -i "s/PLACEHOLDER_API_KEY/$LLM_API_KEY/" /root/.config/opencode/config.json
       
       - name: Fetch changelog
         id: changelog
