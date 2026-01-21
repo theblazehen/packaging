@@ -178,20 +178,14 @@ jobs:
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
       
-      - name: Configure OpenCode auth
-        run: |
-          mkdir -p ~/.local/share/opencode
-          cat > ~/.local/share/opencode/auth.json << 'EOF'
-          {
-            "llmproxy": "${{ secrets.LLM_PROXY_API_KEY }}"
-          }
-          EOF
-      
-      - name: Run OpenCode to prepare update
-        uses: anomalyco/opencode/github@latest
+      - name: Run Claude to prepare update
+        uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.LLM_PROXY_API_KEY }}
+          ANTHROPIC_BASE_URL: https://llmapi.llm.blazelight.dev/
         with:
-          model: llmproxy/antigravity/claude-opus-4-5
-          prompt: |
+          model: antigravity/claude-opus-4-5
+          direct_prompt: |
             Update the AUR package `${{ matrix.update.package }}`.
             
             ## Version Change
