@@ -59,6 +59,11 @@
       "gitref": "refs/tags/v4.6.1",
       "revision": "55298b5d8e56fbfe213a9095a5a84e1ff779a5bc",
       "url": "https://github.com/phillbush/xmenu/releases/tag/v4.6.1"
+    },
+    "yacy": {
+      "version": "1.940",
+      "gitref": "refs/tags/Release_1.940",
+      "url": "https://github.com/yacy/yacy_search_server/releases/tag/Release_1.940"
     }
   }
 }

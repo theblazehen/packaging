@@ -83,3 +83,13 @@ use_commit = true
 source = "git"
 git = "https://github.com/TomSmeets/FractalArt.git"
 use_commit = true
+
+# ═══════════════════════════════════════════════════════════════════
+# Java Applications
+# ═══════════════════════════════════════════════════════════════════
+
+[yacy]
+source = "github"
+github = "yacy/yacy_search_server"
+use_max_tag = true
+prefix = "Release_"
