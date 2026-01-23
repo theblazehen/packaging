@@ -2,7 +2,7 @@ name: AUR Package Update Check
 
 on:
   schedule:
-    - cron: "0 9 * * *"  # Daily at 9am UTC
+    - cron: "0 5 * * *" 
   workflow_dispatch:
     inputs:
       force_package:
