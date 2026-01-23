@@ -5,6 +5,9 @@
 oldver = ".github/nvchecker/old_ver.json"
 newver = ".github/nvchecker/new_ver.json"
 
+[__config__.source.github]
+sort_version_key = "vercmp"
+
 # ═══════════════════════════════════════════════════════════════════
 # Docker packages (track git commits - we patch the source)
 # ═══════════════════════════════════════════════════════════════════
@@ -64,14 +67,12 @@ prefix = "v"
 source = "github"
 github = "phillbush/xmenu"
 use_max_tag = true
-use_sort_version = true
 prefix = "v"
 
 ["aur/arweave-deploy-bin"]
 source = "github"
 github = "ArweaveTeam/arweave-deploy"
 use_max_tag = true
-use_sort_version = true
 prefix = "v"
 
 # ═══════════════════════════════════════════════════════════════════
@@ -104,4 +105,3 @@ source = "github"
 github = "yacy/yacy_search_server"
 use_max_tag = true
 prefix = "Release_"
-sort_version_key = "vercmp"
