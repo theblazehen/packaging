@@ -1,6 +1,11 @@
 {
   "version": 2,
   "data": {
+    "aur/adb-gui-kit-bin": {
+      "version": "1.2",
+      "gitref": "refs/tags/v1.2",
+      "url": "https://github.com/Drenzzz/adb-gui-kit/releases/tag/v1.2"
+    },
     "aur/arweave-deploy-bin": {
       "version": "1.9.0",
       "gitref": "refs/tags/v1.9.0",
@@ -13,8 +18,14 @@
       "url": "https://github.com/assimelha/bdui/releases/tag/v0.2.0"
     },
     "aur/blender-mcp-git": {
-      "version": "61fb53ebd55e1940bb94d611684f310e88d9dea9",
-      "revision": "61fb53ebd55e1940bb94d611684f310e88d9dea9"
+      "version": "7636d13bded82eca58eb93c3f4cd8708dfdfbe8b",
+      "revision": "7636d13bded82eca58eb93c3f4cd8708dfdfbe8b"
+    },
+    "aur/blivet-gui": {
+      "version": "2.6.0",
+      "gitref": "refs/tags/2.6.0",
+      "revision": "8729f9e35a99d9025ea602cd3052796855c221a5",
+      "url": "https://github.com/storaged-project/blivet-gui/releases/tag/2.6.0"
     },
     "aur/ccstatusline": {
       "version": "2.0.23",
@@ -29,6 +40,9 @@
       "gitref": "refs/tags/v1.3.0",
       "url": "https://github.com/mylee04/code-notify/releases/tag/v1.3.0"
     },
+    "aur/comaps": {
+      "version": "2026.01.08"
+    },
     "aur/fractalart-git": {
       "version": "e741eb250054d5baeb0715fbbaeb91f8cb254eb3",
       "revision": "e741eb250054d5baeb0715fbbaeb91f8cb254eb3"
@@ -37,17 +51,14 @@
       "version": "0.4.43",
       "url": "https://www.npmjs.com/package/kimaki/v/0.4.43"
     },
+    "aur/komac": {
+      "version": "2.15.0",
+      "gitref": "refs/tags/v2.15.0",
+      "url": "https://github.com/russellbanks/Komac/releases/tag/v2.15.0"
+    },
     "aur/lazybeads-git": {
       "version": "c8d1bfe8e800082c257274f40f0f799835e155e1",
       "revision": "c8d1bfe8e800082c257274f40f0f799835e155e1"
-    },
-    "aur/ranger-git": {
-      "version": "46c4fde3831dcf00ed85ee4e089df28601932229",
-      "revision": "46c4fde3831dcf00ed85ee4e089df28601932229"
-    },
-    "aur/scrapfetch-git": {
-      "version": "238880f838fd5e29cd8796cb9461ac3f3fef6ace",
-      "revision": "238880f838fd5e29cd8796cb9461ac3f3fef6ace"
     },
     "aur/openchamber": {
       "version": "1.5.5",
@@ -57,39 +68,28 @@
       "version": "0.120.17",
       "url": "https://www.npmjs.com/package/promptfoo/v/0.120.17"
     },
+    "aur/ranger-git": {
+      "version": "46c4fde3831dcf00ed85ee4e089df28601932229",
+      "revision": "46c4fde3831dcf00ed85ee4e089df28601932229"
+    },
+    "aur/scrapfetch-git": {
+      "version": "238880f838fd5e29cd8796cb9461ac3f3fef6ace",
+      "revision": "238880f838fd5e29cd8796cb9461ac3f3fef6ace"
+    },
+    "aur/slackdump-bin": {
+      "version": "3.1.11",
+      "gitref": "refs/tags/v3.1.11",
+      "url": "https://github.com/rusq/slackdump/releases/tag/v3.1.11"
+    },
     "aur/xmenu": {
       "version": "4.6.1",
       "gitref": "refs/tags/v4.6.1",
       "revision": "55298b5d8e56fbfe213a9095a5a84e1ff779a5bc",
       "url": "https://github.com/phillbush/xmenu/releases/tag/v4.6.1"
     },
-    "aur/yacy": {
-      "version": "1.0",
-      "gitref": "refs/tags/1.0",
-      "revision": "29b8d4b9e9e708cd51c9159df8cc9661ec51fcc8",
-      "url": "https://github.com/yacy/yacy_search_server/releases/tag/1.0"
-    },
     "docker/clawd.bot": {
-      "version": "bfbeea0f2034a96e38c93ffb1b6ee03bf4f7384b",
-      "revision": "bfbeea0f2034a96e38c93ffb1b6ee03bf4f7384b"
-    },
-    "aur/blivet-gui": {
-      "version": "2.4.1"
-    },
-    "aur/adb-gui-kit-bin": {
-      "version": "1.1"
-    },
-    "aur/komac": {
-      "version": "2.14.0"
-    },
-    "aur/comaps": {
-      "version": "2025.10.16"
-    },
-    "aur/slackdump-bin": {
-      "version": "3.1.5"
+      "version": "40181afdedb04ce05f9d28d0a34440e810e8c07e",
+      "revision": "40181afdedb04ce05f9d28d0a34440e810e8c07e"
     }
-  },
-  "aur/yacy": {
-    "version": "1.940"
   }
 }
