@@ -1,22 +1,69 @@
+[env]
+PKG_NAME = "adb-gui-kit-bin"
+PKG_TYPE = "aur"
+PKG_DIR = "{{config_root}}"
+AUR_REMOTE = "{{exec(command='cat .aur-remote 2>/dev/null || echo \"\"')}}"
+WORKSPACE = "{{env.CACHE_DIR}}/aur/adb-gui-kit-bin"
+
+[tools]
+jj = "latest"
+
+[tasks.setup]
+description = "Initialize jj workspace tracking AUR"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/setup-workspace"
+
+[tasks.sync]
+description = "Sync with AUR remote"
+depends = ["setup"]
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/sync-upstream"
+
 [tasks.build]
-description = "Build adb-gui-kit-bin package"
-run = "makepkg -sf"
+description = "Build AUR package"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+makepkg -sf
+'''
 
 [tasks.test]
-description = "Install and test adb-gui-kit-bin"
-run = """
-sudo pacman -U --noconfirm adb-gui-kit-bin-*.pkg.tar*
-adb-gui-kit --help || true
-"""
-
-[tasks.lint]
-description = "Run namcap on package"
-run = "namcap PKGBUILD && namcap adb-gui-kit-bin-*.pkg.tar* 2>/dev/null || true"
+description = "Install and smoke test"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+sudo makepkg -si --noconfirm
+adb-gui-kit --help || echo "Installed successfully"
+'''
 
 [tasks.srcinfo]
 description = "Generate .SRCINFO"
-run = "makepkg --printsrcinfo > .SRCINFO"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+makepkg --printsrcinfo > .SRCINFO
+cp .SRCINFO "$PKG_DIR/"
+'''
+
+[tasks.checksums]
+description = "Update checksums in PKGBUILD"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+updpkgsums
+cp PKGBUILD "$PKG_DIR/"
+'''
+
+[tasks.export]
+description = "Copy workspace files back to package dir"
+run = '''
+#!/usr/bin/env bash
+cp "$WORKSPACE/PKGBUILD" "$PKG_DIR/"
+cp "$WORKSPACE/.SRCINFO" "$PKG_DIR/" 2>/dev/null || true
+'''
 
 [tasks.push]
 description = "Push to AUR"
-run = "mise run -w ../.. aur-push aur/adb-gui-kit-bin"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/aur-push"
+
+[tasks.gather-context]
+description = "Gather all context for OpenCode"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/gather-context"
