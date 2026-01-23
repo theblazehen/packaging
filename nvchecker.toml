@@ -9,7 +9,7 @@ newver = ".github/nvchecker/new_ver.json"
 # Docker packages (track git commits - we patch the source)
 # ═══════════════════════════════════════════════════════════════════
 
-[docker/clawd.bot]
+["docker/clawd.bot"]
 source = "git"
 git = "https://github.com/clawdbot/clawdbot.git"
 use_commit = true
@@ -18,23 +18,23 @@ use_commit = true
 # AUR: NPM Packages
 # ═══════════════════════════════════════════════════════════════════
 
-[aur/promptfoo]
+["aur/promptfoo"]
 source = "npm"
 npm = "promptfoo"
 
-[aur/kimaki]
+["aur/kimaki"]
 source = "npm"
 npm = "kimaki"
 
-[aur/openchamber]
+["aur/openchamber"]
 source = "npm"
 npm = "@openchamber/web"
 
-[aur/ccstatusline]
+["aur/ccstatusline"]
 source = "npm"
 npm = "ccstatusline"
 
-[aur/claude-code-ui]
+["aur/claude-code-ui"]
 source = "npm"
 npm = "@siteboon/claude-code-ui"
 
@@ -42,32 +42,32 @@ npm = "@siteboon/claude-code-ui"
 # AUR: GitHub Releases
 # ═══════════════════════════════════════════════════════════════════
 
-[aur/bdui-bin]
+["aur/bdui-bin"]
 source = "github"
 github = "assimelha/bdui"
 use_latest_release = true
 prefix = "v"
 
-[aur/code-notify]
+["aur/code-notify"]
 source = "github"
 github = "mylee04/code-notify"
 use_latest_release = true
 prefix = "v"
 
-[aur/claude-notify]
+["aur/claude-notify"]
 source = "github"
 github = "mylee04/claude-notify"
 use_latest_release = true
 prefix = "v"
 
-[aur/xmenu]
+["aur/xmenu"]
 source = "github"
 github = "phillbush/xmenu"
 use_max_tag = true
 use_sort_version = true
 prefix = "v"
 
-[aur/arweave-deploy-bin]
+["aur/arweave-deploy-bin"]
 source = "github"
 github = "ArweaveTeam/arweave-deploy"
 use_max_tag = true
@@ -80,17 +80,17 @@ prefix = "v"
 # nvchecker returns full commit hash, we compare short hash portion
 # ═══════════════════════════════════════════════════════════════════
 
-[aur/blender-mcp-git]
+["aur/blender-mcp-git"]
 source = "git"
 git = "https://github.com/ahujasid/blender-mcp.git"
 use_commit = true
 
-[aur/lazybeads-git]
+["aur/lazybeads-git"]
 source = "git"
 git = "https://github.com/codegangsta/lazybeads.git"
 use_commit = true
 
-[aur/fractalart-git]
+["aur/fractalart-git"]
 source = "git"
 git = "https://github.com/TomSmeets/FractalArt.git"
 use_commit = true
@@ -99,7 +99,7 @@ use_commit = true
 # AUR: Java Applications
 # ═══════════════════════════════════════════════════════════════════
 
-[aur/yacy]
+["aur/yacy"]
 source = "github"
 github = "yacy/yacy_search_server"
 use_max_tag = true
