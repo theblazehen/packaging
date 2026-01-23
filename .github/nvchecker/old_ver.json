@@ -1,10 +1,6 @@
 {
   "version": 2,
   "data": {
-    "docker/clawd.bot": {
-      "version": "0000000000000000000000000000000000000000",
-      "revision": "0000000000000000000000000000000000000000"
-    },
     "aur/arweave-deploy-bin": {
       "version": "1.9.0",
       "gitref": "refs/tags/v1.9.0",
@@ -55,8 +51,8 @@
       "url": "https://www.npmjs.com/package/@openchamber/web/v/1.5.5"
     },
     "aur/promptfoo": {
-      "version": "0.120.16",
-      "url": "https://www.npmjs.com/package/promptfoo/v/0.120.16"
+      "version": "0.120.17",
+      "url": "https://www.npmjs.com/package/promptfoo/v/0.120.17"
     },
     "aur/xmenu": {
       "version": "4.6.1",
@@ -65,9 +61,14 @@
       "url": "https://github.com/phillbush/xmenu/releases/tag/v4.6.1"
     },
     "aur/yacy": {
-      "version": "1.940",
-      "gitref": "refs/tags/Release_1.940",
-      "url": "https://github.com/yacy/yacy_search_server/releases/tag/Release_1.940"
+      "version": "1.0",
+      "gitref": "refs/tags/1.0",
+      "revision": "29b8d4b9e9e708cd51c9159df8cc9661ec51fcc8",
+      "url": "https://github.com/yacy/yacy_search_server/releases/tag/1.0"
+    },
+    "docker/clawd.bot": {
+      "version": "bfbeea0f2034a96e38c93ffb1b6ee03bf4f7384b",
+      "revision": "bfbeea0f2034a96e38c93ffb1b6ee03bf4f7384b"
     }
   }
 }
