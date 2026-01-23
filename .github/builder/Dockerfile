@@ -16,23 +16,27 @@ RUN pacman -Syu --noconfirm && \
         unzip \
         namcap \
         curl \
+        sudo \
         && \
     pacman -Scc --noconfirm
 
+# Create builder user with UID 1001 (GitHub Actions runner UID)
+# This allows seamless file permissions with checkout/cache actions
+RUN useradd -m -u 1001 builder && \
+    echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Install OpenCode
 RUN curl -fsSL https://opencode.ai/install | bash && \
     mv /root/.opencode/bin/opencode /usr/local/bin/opencode
 
-# Install mise
+# Install mise to /usr/local/bin for all users
 RUN curl https://mise.run | sh && \
-    ln -s /root/.local/bin/mise /usr/local/bin/mise
+    mv /root/.local/bin/mise /usr/local/bin/mise
 
-# Install jj via mise
-RUN /root/.local/bin/mise use -g jj@latest && \
-    ln -s /root/.local/share/mise/installs/jj/latest/jj /usr/local/bin/jj
-
-# Create builder user (non-root for makepkg)
-RUN useradd -m builder && \
-    echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+# Install jj directly to /usr/local/bin (avoid per-user mise issues)
+RUN LATEST=$(curl -fsSL https://api.github.com/repos/jj-vcs/jj/releases/latest | jq -r .tag_name) && \
+    curl -fsSL "https://github.com/jj-vcs/jj/releases/download/${LATEST}/jj-${LATEST}-x86_64-unknown-linux-musl.tar.gz" | \
+    tar -xzf - -C /usr/local/bin/ jj
 
 # Setup SSH for AUR
 RUN mkdir -p /home/builder/.ssh && \
@@ -41,6 +45,7 @@ RUN mkdir -p /home/builder/.ssh && \
     chmod 600 /home/builder/.ssh/config && \
     chown -R builder:builder /home/builder/.ssh
 
+# Setup OpenCode config directories
 RUN mkdir -p /home/builder/.config/opencode /root/.config/opencode && \
     chown -R builder:builder /home/builder/.config
 

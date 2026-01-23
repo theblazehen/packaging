@@ -30,7 +30,7 @@ description = "Install and smoke test"
 run = '''
 #!/usr/bin/env bash
 cd "$WORKSPACE"
-makepkg -si --noconfirm
+sudo makepkg -si --noconfirm
 $PKG_NAME --version || $PKG_NAME --help || echo "Installed successfully"
 '''
 

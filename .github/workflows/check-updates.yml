@@ -113,6 +113,7 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user 1001
     strategy:
       matrix:
         update: ${{ fromJson(needs.detect-updates.outputs.packages) }}
