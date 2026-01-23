@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "$AUR_REMOTE" ]]; then
+    echo "ERROR: No .aur-remote configured"
+    exit 1
+fi
+
+cd "$WORKSPACE"
+
+# Ensure we have the latest from our package dir
+cp "$PKG_DIR/PKGBUILD" "$WORKSPACE/"
+cp "$PKG_DIR/.SRCINFO" "$WORKSPACE/"
+
+# Stage and commit
+jj new -m "Update package"
+git add PKGBUILD .SRCINFO
+
+# Get commit message from parent repo's latest commit or use default
+COMMIT_MSG="${COMMIT_MSG:-Update $(date +%Y-%m-%d)}"
+
+jj commit -m "$COMMIT_MSG"
+
+# Push to AUR
+echo "Pushing to AUR: $AUR_REMOTE"
+jj git push --remote origin
+
+echo "Successfully pushed to AUR"

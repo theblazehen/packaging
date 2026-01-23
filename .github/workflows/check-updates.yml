@@ -1,0 +1,272 @@
+name: Package Updates
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Specific package to update (e.g., docker/clawd.bot, aur/promptfoo)'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  packages: read
+
+env:
+  LLM_PROXY_URL: ${{ vars.LLM_PROXY_URL }}
+  LLM_MODEL: ${{ vars.LLM_MODEL }}
+
+jobs:
+  detect-updates:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.detect.outputs.packages }}
+      has_updates: ${{ steps.detect.outputs.has_updates }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install nvchecker
+        run: pip install nvchecker
+      
+      - name: Run nvchecker
+        run: nvchecker -c nvchecker.toml
+      
+      - name: Detect updates
+        id: detect
+        run: |
+          python3 << 'PYEOF'
+          import json
+          import os
+          
+          old_path = '.github/nvchecker/old_ver.json'
+          new_path = '.github/nvchecker/new_ver.json'
+          
+          old_data = {}
+          if os.path.exists(old_path):
+              with open(old_path) as f:
+                  old_raw = json.load(f)
+                  old_data = old_raw.get('data', old_raw)
+          
+          with open(new_path) as f:
+              new_raw = json.load(f)
+              new_data = new_raw.get('data', new_raw)
+          
+          updates = []
+          for pkg, new_info in new_data.items():
+              new_ver = new_info['version'] if isinstance(new_info, dict) else new_info
+              
+              old_info = old_data.get(pkg, {})
+              old_ver = old_info.get('version') if isinstance(old_info, dict) else old_info
+              
+              if old_ver != new_ver:
+                  updates.append({
+                      "package": pkg,
+                      "old_version": old_ver or "unknown",
+                      "new_version": new_ver,
+                  })
+          
+          manual_pkg = os.environ.get('MANUAL_PACKAGE', '')
+          if manual_pkg:
+              updates = [u for u in updates if u['package'] == manual_pkg]
+              if not updates and manual_pkg in new_data:
+                  new_info = new_data[manual_pkg]
+                  new_ver = new_info['version'] if isinstance(new_info, dict) else new_info
+                  updates = [{
+                      "package": manual_pkg,
+                      "old_version": "forced",
+                      "new_version": new_ver,
+                  }]
+          
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"packages={json.dumps(updates)}\n")
+              f.write(f"has_updates={'true' if updates else 'false'}\n")
+          
+          print(f"Found {len(updates)} updates: {[u['package'] for u in updates]}")
+          PYEOF
+        env:
+          MANUAL_PACKAGE: ${{ inputs.package }}
+      
+      - name: Upload nvchecker state
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvchecker-state
+          path: .github/nvchecker/new_ver.json
+
+  update-package:
+    needs: detect-updates
+    if: needs.detect-updates.outputs.has_updates == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/${{ github.repository }}/builder:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      matrix:
+        update: ${{ fromJson(needs.detect-updates.outputs.packages) }}
+      fail-fast: false
+      max-parallel: 1
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup git
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Restore workspace cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/
+          key: workspace-${{ matrix.update.package }}-${{ github.sha }}
+          restore-keys: |
+            workspace-${{ matrix.update.package }}-
+      
+      - name: Setup workspace
+        run: mise -C ${{ matrix.update.package }} setup
+      
+      - name: Fetch changelog
+        id: changelog
+        run: |
+          PKG_TYPE=$(echo "${{ matrix.update.package }}" | cut -d/ -f1)
+          PKG_DIR="${{ matrix.update.package }}"
+          
+          if [[ "$PKG_TYPE" == "docker" ]]; then
+            WORKSPACE=".cache/${{ matrix.update.package }}"
+            OLD_REF=$(cat "$PKG_DIR/.upstream-ref" 2>/dev/null || echo "")
+            
+            if [[ -n "$OLD_REF" ]] && [[ -d "$WORKSPACE" ]]; then
+              cd "$WORKSPACE"
+              jj git fetch upstream 2>/dev/null || true
+              jj log -r "($OLD_REF)..main@upstream" --no-graph \
+                -T 'commit_id.short() ++ " " ++ description.first_line() ++ "\n"' \
+                > /tmp/changelog.txt 2>/dev/null || echo "Unable to fetch changelog" > /tmp/changelog.txt
+              cd -
+            else
+              echo "No previous ref or workspace" > /tmp/changelog.txt
+            fi
+          else
+            echo "AUR package - check upstream release notes" > /tmp/changelog.txt
+          fi
+      
+      - name: Try sync
+        id: sync
+        continue-on-error: true
+        run: |
+          mise -C ${{ matrix.update.package }} sync 2>&1 | tee /tmp/sync-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+      
+      - name: Try build (if sync succeeded)
+        id: build
+        if: steps.sync.outputs.exit_code == '0'
+        continue-on-error: true
+        run: |
+          mise -C ${{ matrix.update.package }} build 2>&1 | tee /tmp/build-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+      
+      - name: Gather all context
+        run: mise -C ${{ matrix.update.package }} gather-context > /tmp/full-context.txt
+      
+      - name: Setup OpenCode config
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
+        run: |
+          mkdir -p .opencode
+          cat > .opencode/opencode.json << EOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "permission": {"bash": "allow", "edit": "allow", "write": "allow"},
+            "provider": {
+              "llmproxy": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "LLM Proxy",
+                "options": {
+                  "baseURL": "$LLM_PROXY_URL",
+                  "apiKey": "$LLM_API_KEY"
+                },
+                "models": {
+                  "$LLM_MODEL": {"name": "LLM Model", "limit": {"context": 200000, "output": 64000}}
+                }
+              }
+            }
+          }
+          EOF
+      
+      - name: Invoke OpenCode
+        env:
+          LLM_PROXY_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          cat > /tmp/prompt.md << 'PROMPT_EOF'
+          # Update: ${{ matrix.update.package }}
+          ## Version: ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
+          
+          $(cat /tmp/full-context.txt)
+          
+          ---
+          
+          ## Goal
+          
+          Make this package build successfully with the new upstream version, 
+          then commit your changes and create a PR.
+          
+          ## Available mise tasks
+          
+          - `mise -C ${{ matrix.update.package }} setup` - Initialize workspace
+          - `mise -C ${{ matrix.update.package }} sync` - Fetch and rebase
+          - `mise -C ${{ matrix.update.package }} build` - Build package
+          - `mise -C ${{ matrix.update.package }} test` - Test package
+          - `mise -C ${{ matrix.update.package }} export` - Export patches/files back
+          - `mise -C ${{ matrix.update.package }} checksums` - Update checksums (AUR)
+          - `mise -C ${{ matrix.update.package }} srcinfo` - Generate .SRCINFO (AUR)
+          
+          ## Workspace location
+          
+          .cache/${{ matrix.update.package }}
+          
+          PROMPT_EOF
+          
+          opencode run "$(cat /tmp/prompt.md)"
+
+  update-nvchecker-state:
+    needs: [detect-updates, update-package]
+    if: always() && needs.detect-updates.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download nvchecker state
+        uses: actions/download-artifact@v4
+        with:
+          name: nvchecker-state
+          path: .github/nvchecker/
+        continue-on-error: true
+      
+      - name: Update state file
+        run: |
+          if [[ -f .github/nvchecker/new_ver.json ]]; then
+            cp .github/nvchecker/new_ver.json .github/nvchecker/old_ver.json
+            
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .github/nvchecker/old_ver.json
+            
+            if ! git diff --staged --quiet; then
+              git commit -m "chore: update nvchecker version state"
+              git push
+            fi
+          fi

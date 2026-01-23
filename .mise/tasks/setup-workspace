@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Works for both Docker (upstream = app source) and AUR (upstream = AUR remote)
+
+mkdir -p "$(dirname "$WORKSPACE")"
+
+if [[ "$PKG_TYPE" == "docker" ]]; then
+    # Docker: clone app upstream
+    if [[ -z "$UPSTREAM" ]]; then
+        echo "ERROR: No .upstream file found"
+        exit 1
+    fi
+    
+    if [[ ! -d "$WORKSPACE/.jj" ]]; then
+        echo "Cloning upstream: $UPSTREAM"
+        git clone "$UPSTREAM" "$WORKSPACE"
+        cd "$WORKSPACE"
+        jj git init --colocate
+        jj git remote add upstream "$UPSTREAM"
+    fi
+    
+    # Apply existing patches if any
+    if [[ -d "$PKG_DIR/patches" ]] && ls "$PKG_DIR/patches"/*.patch 1>/dev/null 2>&1; then
+        cd "$WORKSPACE"
+        
+        # Reset to upstream ref
+        REF="${UPSTREAM_REF:-main}"
+        jj new "$REF" -m "base"
+        
+        for patch in "$PKG_DIR/patches"/*.patch; do
+            echo "Applying: $(basename "$patch")"
+            PATCH_NAME=$(basename "$patch" .patch | sed 's/^[0-9]*-//')
+            git apply "$patch"
+            jj commit -m "$PATCH_NAME"
+        done
+    fi
+
+elif [[ "$PKG_TYPE" == "aur" ]]; then
+    # AUR: clone AUR remote (or init empty if new package)
+    if [[ ! -d "$WORKSPACE/.jj" ]]; then
+        if [[ -n "$AUR_REMOTE" ]]; then
+            echo "Cloning AUR: $AUR_REMOTE"
+            git clone "$AUR_REMOTE" "$WORKSPACE" 2>/dev/null || {
+                echo "New package, initializing empty repo"
+                mkdir -p "$WORKSPACE"
+                cd "$WORKSPACE"
+                git init
+                git remote add origin "$AUR_REMOTE"
+            }
+        else
+            echo "No AUR remote, initializing local workspace"
+            mkdir -p "$WORKSPACE"
+            cd "$WORKSPACE"
+            git init
+        fi
+        cd "$WORKSPACE"
+        jj git init --colocate
+    fi
+    
+    # Copy our PKGBUILD etc. to workspace
+    cp "$PKG_DIR/PKGBUILD" "$WORKSPACE/" 2>/dev/null || true
+    cp "$PKG_DIR/.SRCINFO" "$WORKSPACE/" 2>/dev/null || true
+fi
+
+echo "Workspace ready: $WORKSPACE"

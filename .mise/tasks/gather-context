@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Gather all context for OpenCode before invocation
+# This runs AFTER setup and sync attempts - reads their outputs
+
+cat << HEADER
+================================================================================
+PACKAGE CONTEXT: $PKG_NAME ($PKG_TYPE)
+================================================================================
+
+=== PACKAGE INFO ===
+Name: $PKG_NAME
+Type: $PKG_TYPE
+Directory: $PKG_DIR
+Workspace: $WORKSPACE
+HEADER
+
+if [[ "$PKG_TYPE" == "docker" ]]; then
+    cat << DOCKER_INFO
+Upstream: ${UPSTREAM:-none}
+Current Ref: ${UPSTREAM_REF:-none}
+Registries: ${REGISTRIES:-none}
+DOCKER_INFO
+elif [[ "$PKG_TYPE" == "aur" ]]; then
+    cat << AUR_INFO
+AUR Remote: ${AUR_REMOTE:-none}
+AUR_INFO
+fi
+
+echo ""
+echo "=== SYNC OUTPUT ==="
+if [[ -f /tmp/sync-output.txt ]]; then
+    cat /tmp/sync-output.txt
+else
+    echo "(no sync output captured)"
+fi
+
+echo ""
+echo "=== BUILD OUTPUT ==="
+if [[ -f /tmp/build-output.txt ]]; then
+    cat /tmp/build-output.txt
+else
+    echo "(no build output captured)"
+fi
+
+echo ""
+echo "=== CURRENT PATCHES ==="
+if [[ -d "$PKG_DIR/patches" ]]; then
+    ls -1 "$PKG_DIR/patches/" 2>/dev/null || echo "(no patches)"
+else
+    echo "(no patches directory)"
+fi
+
+echo ""
+echo "=== CHANGELOG (new upstream commits) ==="
+if [[ -f /tmp/changelog.txt ]]; then
+    cat /tmp/changelog.txt
+else
+    echo "(no changelog captured)"
+fi
+
+echo ""
+echo "=== AGENTS.MD ==="
+if [[ -f "$PKG_DIR/AGENTS.md" ]]; then
+    cat "$PKG_DIR/AGENTS.md"
+else
+    echo "(no AGENTS.md found)"
+fi
+
+echo ""
+echo "================================================================================"

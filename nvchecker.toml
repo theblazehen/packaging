@@ -1,4 +1,4 @@
-# nvchecker configuration for AUR package version tracking
+# nvchecker configuration for package version tracking
 # https://nvchecker.readthedocs.io/
 
 [__config__]
@@ -6,59 +6,68 @@ oldver = ".github/nvchecker/old_ver.json"
 newver = ".github/nvchecker/new_ver.json"
 
 # ═══════════════════════════════════════════════════════════════════
-# NPM Packages
+# Docker packages (track git commits - we patch the source)
 # ═══════════════════════════════════════════════════════════════════
 
-[promptfoo]
+[docker/clawd.bot]
+source = "git"
+git = "https://github.com/clawdbot/clawdbot.git"
+use_commit = true
+
+# ═══════════════════════════════════════════════════════════════════
+# AUR: NPM Packages
+# ═══════════════════════════════════════════════════════════════════
+
+[aur/promptfoo]
 source = "npm"
 npm = "promptfoo"
 
-[kimaki]
+[aur/kimaki]
 source = "npm"
 npm = "kimaki"
 
-[openchamber]
+[aur/openchamber]
 source = "npm"
 npm = "@openchamber/web"
 
-[ccstatusline]
+[aur/ccstatusline]
 source = "npm"
 npm = "ccstatusline"
 
-[claude-code-ui]
+[aur/claude-code-ui]
 source = "npm"
 npm = "@siteboon/claude-code-ui"
 
 # ═══════════════════════════════════════════════════════════════════
-# GitHub Releases
+# AUR: GitHub Releases
 # ═══════════════════════════════════════════════════════════════════
 
-[bdui-bin]
+[aur/bdui-bin]
 source = "github"
 github = "assimelha/bdui"
 use_latest_release = true
 prefix = "v"
 
-[code-notify]
+[aur/code-notify]
 source = "github"
 github = "mylee04/code-notify"
 use_latest_release = true
 prefix = "v"
 
-[claude-notify]
+[aur/claude-notify]
 source = "github"
 github = "mylee04/claude-notify"
 use_latest_release = true
 prefix = "v"
 
-[xmenu]
+[aur/xmenu]
 source = "github"
 github = "phillbush/xmenu"
 use_max_tag = true
 use_sort_version = true
 prefix = "v"
 
-[arweave-deploy-bin]
+[aur/arweave-deploy-bin]
 source = "github"
 github = "ArweaveTeam/arweave-deploy"
 use_max_tag = true
@@ -66,31 +75,31 @@ use_sort_version = true
 prefix = "v"
 
 # ═══════════════════════════════════════════════════════════════════
-# Git HEAD (-git packages)
+# AUR: Git HEAD (-git packages)
 # Version format from pkgver(): r<count>.<shorthash>
 # nvchecker returns full commit hash, we compare short hash portion
 # ═══════════════════════════════════════════════════════════════════
 
-[blender-mcp-git]
+[aur/blender-mcp-git]
 source = "git"
 git = "https://github.com/ahujasid/blender-mcp.git"
 use_commit = true
 
-[lazybeads-git]
+[aur/lazybeads-git]
 source = "git"
 git = "https://github.com/codegangsta/lazybeads.git"
 use_commit = true
 
-[fractalart-git]
+[aur/fractalart-git]
 source = "git"
 git = "https://github.com/TomSmeets/FractalArt.git"
 use_commit = true
 
 # ═══════════════════════════════════════════════════════════════════
-# Java Applications
+# AUR: Java Applications
 # ═══════════════════════════════════════════════════════════════════
 
-[yacy]
+[aur/yacy]
 source = "github"
 github = "yacy/yacy_search_server"
 use_max_tag = true

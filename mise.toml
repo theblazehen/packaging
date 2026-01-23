@@ -1,0 +1,26 @@
+[tools]
+jj = "latest"
+usage = "latest"
+
+[env]
+PACKAGING_ROOT = "{{config_root}}"
+CACHE_DIR = "{{config_root}}/.cache"
+
+[tasks.setup-all]
+description = "Setup all package workspaces"
+run = "mise //...:setup"
+
+[tasks.sync-all]
+description = "Sync all upstreams"
+run = "mise //...:sync"
+
+[tasks.list]
+description = "List all packages"
+run = '''
+#!/usr/bin/env bash
+echo "=== Docker packages ==="
+for d in docker/*/; do echo "  ${d%/}"; done 2>/dev/null || echo "  (none)"
+echo ""
+echo "=== AUR packages ==="
+for d in aur/*/; do echo "  ${d%/}"; done 2>/dev/null || echo "  (none)"
+'''

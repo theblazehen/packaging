@@ -1,0 +1,27 @@
+From 1b9650115eef07e9f0723666adbd35e385f33855 Mon Sep 17 00:00:00 2001
+From: Jasmin Le Roux <theblazehen@gmail.com>
+Date: Mon, 12 Jan 2026 08:08:18 +0200
+Subject: [PATCH 4/7] Dockerfile.sandbox: add chromium and fonts
+
+---
+ Dockerfile.sandbox | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Dockerfile.sandbox b/Dockerfile.sandbox
+index dec3f32d1..9ef4812f6 100644
+--- a/Dockerfile.sandbox
++++ b/Dockerfile.sandbox
+@@ -6,7 +6,10 @@ RUN apt-get update \
+   && apt-get install -y --no-install-recommends \
+     bash \
+     ca-certificates \
++    chromium \
+     curl \
++    fonts-liberation \
++    fonts-noto-color-emoji \
+     git \
+     jq \
+     python3 \
+-- 
+2.52.0
+

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$WORKSPACE"
+
+if [[ "$PKG_TYPE" == "docker" ]]; then
+    echo "Fetching upstream..."
+    jj git fetch upstream
+    
+    echo "Rebasing patches onto upstream..."
+    jj rebase -d main@upstream 2>&1 || true
+    
+    # Check for conflicts
+    if jj log -r @ --no-graph 2>&1 | grep -q "conflict"; then
+        echo "STATUS: CONFLICTS"
+        jj status
+        exit 1
+    else
+        echo "STATUS: CLEAN"
+    fi
+
+elif [[ "$PKG_TYPE" == "aur" ]]; then
+    echo "Fetching from AUR..."
+    jj git fetch origin 2>/dev/null || echo "No remote or new package"
+    
+    # Sync our files
+    cp "$PKG_DIR/PKGBUILD" "$WORKSPACE/"
+    cp "$PKG_DIR/.SRCINFO" "$WORKSPACE/" 2>/dev/null || true
+    
+    echo "STATUS: SYNCED"
+fi

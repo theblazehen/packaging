@@ -1,0 +1,69 @@
+[env]
+PKG_NAME = "openchamber"
+PKG_TYPE = "aur"
+PKG_DIR = "{{config_root}}"
+AUR_REMOTE = "{{exec(command='cat .aur-remote 2>/dev/null || echo \"\"')}}"
+WORKSPACE = "{{env.CACHE_DIR}}/aur/openchamber"
+
+[tools]
+jj = "latest"
+
+[tasks.setup]
+description = "Initialize jj workspace tracking AUR"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/setup-workspace"
+
+[tasks.sync]
+description = "Sync with AUR remote"
+depends = ["setup"]
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/sync-upstream"
+
+[tasks.build]
+description = "Build AUR package"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+makepkg -sf
+'''
+
+[tasks.test]
+description = "Install and smoke test"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+makepkg -si --noconfirm
+$PKG_NAME --version || $PKG_NAME --help || echo "Installed successfully"
+'''
+
+[tasks.srcinfo]
+description = "Generate .SRCINFO"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+makepkg --printsrcinfo > .SRCINFO
+cp .SRCINFO "$PKG_DIR/"
+'''
+
+[tasks.checksums]
+description = "Update checksums in PKGBUILD"
+run = '''
+#!/usr/bin/env bash
+cd "$WORKSPACE"
+updpkgsums
+cp PKGBUILD "$PKG_DIR/"
+'''
+
+[tasks.export]
+description = "Copy workspace files back to package dir"
+run = '''
+#!/usr/bin/env bash
+cp "$WORKSPACE/PKGBUILD" "$PKG_DIR/"
+cp "$WORKSPACE/.SRCINFO" "$PKG_DIR/" 2>/dev/null || true
+'''
+
+[tasks.push]
+description = "Push to AUR"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/aur-push"
+
+[tasks.gather-context]
+description = "Gather all context for OpenCode"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/gather-context"

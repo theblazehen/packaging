@@ -19,3 +19,6 @@ npm-cache/
 # Nested AUR git repos - we track files directly, not as submodules
 aur/*/.git/
 repomix-output.xml
+
+# jj workspaces (cached, regenerated from patches)
+.cache/

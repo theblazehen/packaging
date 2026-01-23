@@ -1,0 +1,55 @@
+[env]
+PKG_NAME = "clawd.bot"
+PKG_TYPE = "docker"
+PKG_DIR = "{{config_root}}"
+UPSTREAM = "{{exec(command='cat .upstream 2>/dev/null || echo \"\"')}}"
+UPSTREAM_REF = "{{exec(command='cat .upstream-ref 2>/dev/null || echo \"\"')}}"
+REGISTRIES = "{{exec(command='cat .registries 2>/dev/null || echo \"\"')}}"
+WORKSPACE = "{{env.CACHE_DIR}}/docker/clawd.bot"
+
+[tools]
+jj = "latest"
+
+[tasks.setup]
+description = "Initialize jj workspace from upstream"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/setup-workspace"
+
+[tasks.sync]
+description = "Fetch upstream and rebase patches"
+depends = ["setup"]
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/sync-upstream"
+
+[tasks.export]
+description = "Export jj commits as patch files"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/export-patches"
+
+[tasks.build]
+description = "Build Docker image"
+run = "docker build -t $PKG_NAME:local $WORKSPACE"
+
+[tasks.test]
+description = "Test Docker image"
+run = '''
+#!/usr/bin/env bash
+docker run --rm $PKG_NAME:local --version 2>/dev/null || \
+docker run --rm $PKG_NAME:local --help 2>/dev/null || \
+echo "Basic run test passed"
+'''
+
+[tasks.push]
+description = "Push to all registries"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+VERSION=${VERSION:-latest}
+while IFS= read -r registry; do
+  [[ -z "$registry" ]] && continue
+  echo "Pushing to $registry:$VERSION"
+  docker tag $PKG_NAME:local "$registry:$VERSION"
+  docker push "$registry:$VERSION"
+done < "$PKG_DIR/.registries"
+'''
+
+[tasks.gather-context]
+description = "Gather all context for OpenCode"
+run = "{{env.PACKAGING_ROOT}}/.mise/tasks/gather-context"

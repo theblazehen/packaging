@@ -1,21 +1,20 @@
 name: Push to AUR
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches: [main]
     paths:
       - 'aur/**/PKGBUILD'
       - 'aur/**/.SRCINFO'
 
 jobs:
   push-to-aur:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Setup SSH for AUR
         run: |
@@ -34,7 +33,7 @@ jobs:
       - name: Determine changed packages
         id: changed
         run: |
-          packages=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
+          packages=$(git diff --name-only HEAD~1 HEAD \
             | grep '^aur/' \
             | cut -d/ -f2 \
             | sort -u \
@@ -60,6 +59,7 @@ jobs:
               cd -
             }
             
+            # Copy only PKGBUILD and .SRCINFO (NOT mise.toml, AGENTS.md, etc)
             cp PKGBUILD .SRCINFO ../aur-$pkg-temp/
             cd ../aur-$pkg-temp
             
@@ -68,14 +68,14 @@ jobs:
             
             git add PKGBUILD .SRCINFO
             
-            COMMIT_MSG=$(git -C "$GITHUB_WORKSPACE" log --format=%s -1 ${{ github.sha }})
+            COMMIT_MSG=$(git -C "$GITHUB_WORKSPACE" log --format=%s -1)
             
             if ! git diff --staged --quiet; then
               git commit -m "$COMMIT_MSG"
               git push origin master
-              echo "✅ Successfully pushed $pkg to AUR"
+              echo "Successfully pushed $pkg to AUR"
             else
-              echo "⏭️ No changes to push for $pkg"
+              echo "No changes to push for $pkg"
             fi
             
             cd "$GITHUB_WORKSPACE"

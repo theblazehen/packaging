@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Only meaningful for Docker packages (patches on upstream source)
+if [[ "$PKG_TYPE" != "docker" ]]; then
+    echo "export-patches: skipping for $PKG_TYPE packages"
+    exit 0
+fi
+
+cd "$WORKSPACE"
+
+# Determine base commit (upstream)
+BASE=$(jj log -r "main@upstream" --no-graph -T 'commit_id' 2>/dev/null || echo "")
+if [[ -z "$BASE" ]]; then
+    echo "Cannot determine upstream base"
+    exit 1
+fi
+
+echo "Exporting patches from upstream to HEAD..."
+
+rm -rf "$PKG_DIR/patches"
+mkdir -p "$PKG_DIR/patches"
+
+# Get list of commits between upstream and HEAD (oldest first)
+COMMITS=$(jj log -r "($BASE)..@" --no-graph -T 'commit_id.short() ++ "\n"' 2>/dev/null | tac)
+
+COUNT=1
+for rev in $COMMITS; do
+    [[ -z "$rev" ]] && continue
+    
+    PADDED=$(printf "%04d" $COUNT)
+    
+    # Get commit message for filename
+    MSG=$(jj log -r "$rev" --no-graph -T 'description.first_line()' 2>/dev/null || echo "patch")
+    SAFE_MSG=$(echo "$MSG" | tr ' ' '-' | tr -cd 'a-zA-Z0-9-' | head -c 50)
+    
+    FILENAME="${PADDED}-${SAFE_MSG}.patch"
+    
+    echo "Exporting: $FILENAME"
+    jj diff -r "$rev" --git > "$PKG_DIR/patches/$FILENAME"
+    
+    ((COUNT++))
+done
+
+# Update upstream ref
+jj log -r "main@upstream" --no-graph -T 'commit_id' > "$PKG_DIR/.upstream-ref"
+
+echo "Exported $((COUNT-1)) patches"
+echo "Updated .upstream-ref to $(cat "$PKG_DIR/.upstream-ref" | head -c 12)..."
