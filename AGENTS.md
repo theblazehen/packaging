@@ -79,3 +79,78 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **License**: Ensure proper SPDX identifiers
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
+
+## Current Packages (14 total)
+
+| Package | Type | Source |
+|---------|------|--------|
+| promptfoo | npm | `promptfoo` |
+| kimaki | npm | `kimaki` |
+| claude-code-ui | npm | `@anthropic-ai/claude-code` |
+| claude-notify | GitHub | `theblazehen/claude-notify` |
+| code-notify | GitHub | `theblazehen/code-notify` |
+| yacy | GitHub | `yacy/yacy_search_server` |
+| ccstatusline | npm | `ccstatusline` |
+| openchamber | GitHub | `nicobrenner/openchamber` |
+| bdui-bin | GitHub | `AnubhabB/retaurant-llm` |
+| xmenu | GitHub | `phillbush/xmenu` |
+| arweave-deploy-bin | GitHub | `ArweaveTeam/arweave-deploy` |
+| blender-mcp-git | git | `ahgsql/blender-mcp` |
+| lazybeads-git | git | `theblazehen/lazybeads` |
+| fractalart-git | git | `theblazehen/FractalArt` |
+
+## Package Files
+
+Each package directory contains:
+- `PKGBUILD` - Package build script
+- `.SRCINFO` - Generated metadata (run `makepkg --printsrcinfo > .SRCINFO`)
+- `mise.toml` - Local tasks (build, test, lint)
+- `AGENTS.md` - Package-specific instructions
+- `.aur-files` - Manifest of files to push to AUR
+- `.aur-remote` - AUR git remote URL
+
+Some packages have additional files:
+- `yacy`: `.install`, `.service`, `.sh` scripts
+- `fractalart-git`: `.desktop`, `.install` files
+
+## Workflow Details
+
+### check-updates.yml
+
+The main workflow that:
+1. Runs nvchecker to detect version changes
+2. Spawns OpenCode in an Arch container to update packages
+3. Creates PRs for successful updates or Issues for failures
+
+**Key features:**
+- Runs as UID 1001 (`builder` user) for makepkg compatibility
+- Per-package workspace caching
+- 15-minute timeout for builds (`timeout: 900000`)
+- Single build after version update (no redundant rebuilds)
+
+### aur-push.yml
+
+Triggered on PR merge to main:
+1. Reads `.aur-files` manifest for each changed package
+2. Pushes listed files to the AUR git remote
+
+## Container Image
+
+Built from `.github/builder/Dockerfile`:
+- Base: `archlinux:base-devel`
+- Tools: mise, jujutsu (jj), OpenCode, namcap
+- User: `builder` (UID 1001) for makepkg
+
+## Mise Tasks
+
+Global tasks in `.mise/tasks/`:
+- `setup-workspace` - Initialize jj colocated repo
+- `sync-upstream` - Sync with AUR remote
+- `export-patches` - Export local changes as patches
+- `gather-context` - Collect context for OpenCode
+- `aur-push` - Push to AUR (reads `.aur-files`)
+
+Per-package tasks in `aur/*/mise.toml`:
+- `build` - Build with makepkg
+- `test` - Install and basic smoke test
+- `lint` - Run namcap checks

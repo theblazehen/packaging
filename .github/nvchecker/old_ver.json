@@ -70,5 +70,8 @@
       "version": "bfbeea0f2034a96e38c93ffb1b6ee03bf4f7384b",
       "revision": "bfbeea0f2034a96e38c93ffb1b6ee03bf4f7384b"
     }
+  },
+  "aur/yacy": {
+    "version": "1.940"
   }
 }
