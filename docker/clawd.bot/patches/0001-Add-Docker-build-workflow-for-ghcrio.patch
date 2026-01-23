@@ -1,16 +1,6 @@
-From 696bb7e220b00c77b1a2bae030bd23e14bb0ba4c Mon Sep 17 00:00:00 2001
-From: Jasmin Le Roux <theblazehen@gmail.com>
-Date: Sun, 11 Jan 2026 17:07:26 +0200
-Subject: [PATCH 1/7] Add Docker build workflow for ghcr.io
-
----
- .github/workflows/docker-build.yml | 57 ++++++++++++++++++++++++++++++
- 1 file changed, 57 insertions(+)
- create mode 100644 .github/workflows/docker-build.yml
-
 diff --git a/.github/workflows/docker-build.yml b/.github/workflows/docker-build.yml
 new file mode 100644
-index 000000000..4f625f105
+index 0000000000..4f625f105e
 --- /dev/null
 +++ b/.github/workflows/docker-build.yml
 @@ -0,0 +1,57 @@
@@ -71,6 +61,3 @@ index 000000000..4f625f105
 +          labels: ${{ steps.meta.outputs.labels }}
 +          cache-from: type=gha
 +          cache-to: type=gha,mode=max
--- 
-2.52.0
-

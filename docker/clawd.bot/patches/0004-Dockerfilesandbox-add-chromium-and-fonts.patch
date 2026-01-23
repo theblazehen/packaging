@@ -1,0 +1,15 @@
+diff --git a/Dockerfile.sandbox b/Dockerfile.sandbox
+index dec3f32d11..9ef4812f6e 100644
+--- a/Dockerfile.sandbox
++++ b/Dockerfile.sandbox
+@@ -6,7 +6,10 @@
+   && apt-get install -y --no-install-recommends \
+     bash \
+     ca-certificates \
++    chromium \
+     curl \
++    fonts-liberation \
++    fonts-noto-color-emoji \
+     git \
+     jq \
+     python3 \

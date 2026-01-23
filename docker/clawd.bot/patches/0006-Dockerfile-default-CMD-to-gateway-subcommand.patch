@@ -1,0 +1,10 @@
+diff --git a/Dockerfile b/Dockerfile
+index 0bd72df09b..00b7cbc14a 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -42,4 +42,4 @@
+ 
+ ENV NODE_ENV=production
+ 
+-CMD ["node", "dist/index.js"]
++CMD ["node", "dist/index.js", "gateway"]
