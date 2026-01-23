@@ -5,7 +5,7 @@ cd "$WORKSPACE"
 
 if [[ "$PKG_TYPE" == "docker" ]]; then
     echo "Fetching upstream..."
-    jj git fetch upstream
+    jj git fetch --remote upstream
     
     echo "Rebasing patches onto upstream..."
     jj rebase -d main@upstream 2>&1 || true
