@@ -1,7 +1,7 @@
 pkgbase = xmenu
 	pkgdesc = A menu utility for X.
 	pkgver = 4.6.1
-	pkgrel = 3
+	pkgrel = 1
 	url = https://github.com/phillbush/xmenu
 	arch = x86_64
 	arch = i686
