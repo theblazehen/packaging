@@ -233,7 +233,7 @@ jobs:
           
           - `mise -C ${{ matrix.update.package }} r setup` - Initialize workspace
           - `mise -C ${{ matrix.update.package }} r sync` - Fetch and rebase
-          - `mise -C ${{ matrix.update.package }} r build` - Build package
+          - `mise -C ${{ matrix.update.package }} r build` - Build package (use timeout: 600000 for npm packages)
           - `mise -C ${{ matrix.update.package }} r test` - Test package
           - `mise -C ${{ matrix.update.package }} r export` - Export patches/files back
           - `mise -C ${{ matrix.update.package }} r checksums` - Update checksums (AUR)
@@ -242,6 +242,11 @@ jobs:
           ## Workspace location
           
           .cache/${{ matrix.update.package }}
+          
+          ## Important notes
+          
+          - Build commands may take 5-10 minutes. Use `timeout: 600000` (10 min) for build/test bash commands.
+          - For Node.js packages, ensure PKGBUILD has `options=('!strip')` to avoid slow debug symbol processing.
           
           PROMPT_EOF
           
