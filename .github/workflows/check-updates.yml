@@ -171,14 +171,6 @@ jobs:
           mise -C ${{ matrix.update.package }} r sync 2>&1 | tee /tmp/sync-output.txt
           echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
       
-      - name: Try build (if sync succeeded)
-        id: build
-        if: steps.sync.outputs.exit_code == '0'
-        continue-on-error: true
-        run: |
-          mise -C ${{ matrix.update.package }} r build 2>&1 | tee /tmp/build-output.txt
-          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
-      
       - name: Gather all context
         run: mise -C ${{ matrix.update.package }} r gather-context > /tmp/full-context.txt
       
@@ -217,7 +209,6 @@ jobs:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         run: |
           SYNC_STATUS="${{ steps.sync.outputs.exit_code == '0' && 'SUCCESS' || 'FAILED' }}"
-          BUILD_STATUS="${{ steps.build.outputs.exit_code == '0' && 'SUCCESS' || 'FAILED' }}"
           
           cat > /tmp/prompt.md << PROMPT_EOF
           # Update: ${{ matrix.update.package }}
@@ -226,7 +217,6 @@ jobs:
           ## Previous step results
           
           - **Sync**: ${SYNC_STATUS}
-          - **Build**: ${BUILD_STATUS}
           
           $(cat /tmp/full-context.txt)
           
@@ -236,20 +226,19 @@ jobs:
           
           Update this package to the new version and create a PR.
           
-          ### If build SUCCEEDED:
-          1. Review the build output for warnings, deprecations, or improvements worth addressing
-          2. Review the changelog for breaking changes, new dependencies, or security fixes
-          3. If improvements are needed, make them and rebuild
-          4. Run \`export\`, \`srcinfo\`, commit, and create PR
+          ## Workflow
           
-          ### If build FAILED:
-          1. Analyze the build logs to understand the failure
-          2. Fix the issue in the workspace PKGBUILD
-          3. Run \`checksums\` if you changed the version/source
-          4. Rebuild and verify it passes
-          5. Run \`export\`, \`srcinfo\`, commit, and create PR
+          1. Update \`pkgver\` in workspace PKGBUILD to the new version
+          2. Run \`checksums\` to download new source and update sha256sums
+          3. Run \`build\` to verify the package builds (use timeout: 900000)
+          4. Review build output for warnings worth fixing
+          5. Run \`srcinfo\` to regenerate .SRCINFO
+          6. Run \`export\` to copy changes back to package dir
+          7. Commit and create PR
           
-          ### Things to look for even on success:
+          **DO NOT** rebuild if the build already succeeded unless you made changes that require it.
+          
+          ## Things to check in build output:
           - Deprecation warnings that could be fixed now
           - New optional dependencies mentioned upstream
           - Security advisories requiring PKGBUILD changes
