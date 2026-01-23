@@ -1,6 +1,6 @@
 pkgbase = claude-notify
 	pkgdesc = Cross-platform desktop notifications for Claude Code
-	pkgver = 1.1.0
+	pkgver = 1.3.0
 	pkgrel = 1
 	url = https://github.com/mylee04/claude-notify
 	arch = any
@@ -8,7 +8,7 @@ pkgbase = claude-notify
 	depends = bash
 	depends = libnotify
 	optdepends = jq: for JSON parsing in status detection
-	source = claude-notify-1.1.0.tar.gz::https://github.com/mylee04/claude-notify/archive/refs/tags/v1.1.0.tar.gz
-	sha256sums = 4dd733b2321774631a06e32d54de2b2ee03c9194412d2f5076863b488f5fe9be
+	source = code-notify-1.3.0.tar.gz::https://github.com/mylee04/claude-notify/archive/refs/tags/v1.3.0.tar.gz
+	sha256sums = 2f96994e1fa4183726208bddb9952eac2c6156a8948763de97f1792279191a33
 
 pkgname = claude-notify
