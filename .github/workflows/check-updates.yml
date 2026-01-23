@@ -97,6 +97,7 @@ jobs:
       
       - name: Upload nvchecker state
         uses: actions/upload-artifact@v4
+        if: ${{ !env.ACT }}
         with:
           name: nvchecker-state
           path: .github/nvchecker/new_ver.json

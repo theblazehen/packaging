@@ -1,16 +1,16 @@
-name: Build AUR Builder Container
+name: Build Builder Container
 
 on:
   push:
     branches: [main]
     paths:
-      - 'docker/aur-builder/**'
+      - '.github/builder/**'
       - '.github/workflows/build-container.yml'
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/aur-builder
+  IMAGE_NAME: ${{ github.repository }}/builder
 
 jobs:
   build:
@@ -41,7 +41,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: docker/aur-builder
+          context: .github/builder
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

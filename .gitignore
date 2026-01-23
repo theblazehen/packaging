@@ -22,3 +22,6 @@ repomix-output.xml
 
 # jj workspaces (cached, regenerated from patches)
 .cache/
+.actrc
+.secrets
+.vars
