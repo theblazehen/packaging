@@ -5,9 +5,6 @@
 oldver = ".github/nvchecker/old_ver.json"
 newver = ".github/nvchecker/new_ver.json"
 
-[__config__.source.github]
-sort_version_key = "vercmp"
-
 # ═══════════════════════════════════════════════════════════════════
 # Docker packages (track git commits - we patch the source)
 # ═══════════════════════════════════════════════════════════════════
