@@ -45,6 +45,10 @@
       "version": "46c4fde3831dcf00ed85ee4e089df28601932229",
       "revision": "46c4fde3831dcf00ed85ee4e089df28601932229"
     },
+    "aur/scrapfetch-git": {
+      "version": "238880f838fd5e29cd8796cb9461ac3f3fef6ace",
+      "revision": "238880f838fd5e29cd8796cb9461ac3f3fef6ace"
+    },
     "aur/openchamber": {
       "version": "1.5.5",
       "url": "https://www.npmjs.com/package/@openchamber/web/v/1.5.5"

@@ -1,0 +1,6 @@
+*.zst
+*.tar
+*.tar.*
+pkg/
+src/
+scrapfetch-git/

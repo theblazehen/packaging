@@ -1,0 +1,15 @@
+pkgbase = scrapfetch-git
+	pkgdesc = A tool for fetching system information. Written in C for Linux.
+	pkgver = r6.238880f
+	pkgrel = 1
+	url = https://github.com/amodi444/scrapfetch
+	arch = x86_64
+	license = GPL-3.0-or-later
+	makedepends = git
+	depends = glibc
+	provides = scrapfetch
+	conflicts = scrapfetch
+	source = scrapfetch-git::git+https://github.com/amodi444/scrapfetch.git
+	sha256sums = SKIP
+
+pkgname = scrapfetch-git

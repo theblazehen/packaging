@@ -1,0 +1,22 @@
+[tasks.build]
+description = "Build scrapfetch-git package"
+run = "makepkg -sf"
+
+[tasks.test]
+description = "Install and test scrapfetch-git"
+run = """
+sudo pacman -U --noconfirm scrapfetch-git-*.pkg.tar*
+scrapfetch
+"""
+
+[tasks.lint]
+description = "Run namcap on package"
+run = "namcap PKGBUILD && namcap scrapfetch-git-*.pkg.tar* 2>/dev/null || true"
+
+[tasks.srcinfo]
+description = "Generate .SRCINFO"
+run = "makepkg --printsrcinfo > .SRCINFO"
+
+[tasks.push]
+description = "Push to AUR"
+run = "mise run -w ../.. aur-push aur/scrapfetch-git"
