@@ -80,15 +80,14 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 
-## Current Packages (14 total)
+## Current Packages (13 total)
 
 | Package | Type | Source |
 |---------|------|--------|
 | promptfoo | npm | `promptfoo` |
 | kimaki | npm | `kimaki` |
 | claude-code-ui | npm | `@anthropic-ai/claude-code` |
-| claude-notify | GitHub | `theblazehen/claude-notify` |
-| code-notify | GitHub | `theblazehen/code-notify` |
+| code-notify | GitHub | `mylee04/code-notify` |
 | yacy | GitHub | `yacy/yacy_search_server` |
 | ccstatusline | npm | `ccstatusline` |
 | openchamber | GitHub | `nicobrenner/openchamber` |

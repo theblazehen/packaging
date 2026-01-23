@@ -1,9 +1,9 @@
 [env]
-PKG_NAME = "claude-notify"
+PKG_NAME = "ranger-git"
 PKG_TYPE = "aur"
 PKG_DIR = "{{config_root}}"
 AUR_REMOTE = "{{exec(command='cat .aur-remote 2>/dev/null || echo \"\"')}}"
-WORKSPACE = "{{env.CACHE_DIR}}/aur/claude-notify"
+WORKSPACE = "{{env.CACHE_DIR}}/aur/ranger-git"
 
 [tools]
 jj = "latest"
@@ -31,7 +31,7 @@ run = '''
 #!/usr/bin/env bash
 cd "$WORKSPACE"
 sudo makepkg -si --noconfirm
-$PKG_NAME --version || $PKG_NAME --help || echo "Installed successfully"
+ranger --version || ranger --help || echo "Installed successfully"
 '''
 
 [tasks.srcinfo]

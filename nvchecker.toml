@@ -57,12 +57,6 @@ github = "mylee04/code-notify"
 use_latest_release = true
 prefix = "v"
 
-["aur/claude-notify"]
-source = "github"
-github = "mylee04/claude-notify"
-use_latest_release = true
-prefix = "v"
-
 ["aur/xmenu"]
 source = "github"
 github = "phillbush/xmenu"
@@ -94,6 +88,11 @@ use_commit = true
 ["aur/fractalart-git"]
 source = "git"
 git = "https://github.com/TomSmeets/FractalArt.git"
+use_commit = true
+
+["aur/ranger-git"]
+source = "git"
+git = "https://github.com/ranger/ranger.git"
 use_commit = true
 
 # ═══════════════════════════════════════════════════════════════════
