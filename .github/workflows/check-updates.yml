@@ -232,21 +232,29 @@ jobs:
           ## Available mise tasks
           
           - `mise -C ${{ matrix.update.package }} r setup` - Initialize workspace
-          - `mise -C ${{ matrix.update.package }} r sync` - Fetch and rebase
-          - `mise -C ${{ matrix.update.package }} r build` - Build package (use timeout: 600000 for npm packages)
+          - `mise -C ${{ matrix.update.package }} r sync` - Copy files from package dir to workspace
+          - `mise -C ${{ matrix.update.package }} r build` - Build package
           - `mise -C ${{ matrix.update.package }} r test` - Test package
-          - `mise -C ${{ matrix.update.package }} r export` - Export patches/files back
-          - `mise -C ${{ matrix.update.package }} r checksums` - Update checksums (AUR)
-          - `mise -C ${{ matrix.update.package }} r srcinfo` - Generate .SRCINFO (AUR)
+          - `mise -C ${{ matrix.update.package }} r export` - Copy workspace files back to package dir
+          - `mise -C ${{ matrix.update.package }} r checksums` - Update checksums in PKGBUILD
+          - `mise -C ${{ matrix.update.package }} r srcinfo` - Generate .SRCINFO
           
-          ## Workspace location
+          ## Workflow for AUR packages
           
-          .cache/${{ matrix.update.package }}
+          1. Edit PKGBUILD in workspace: `.cache/${{ matrix.update.package }}/PKGBUILD`
+          2. Run `checksums` to update sha256sums
+          3. Run `build` to test the build (use timeout: 900000)
+          4. Run `srcinfo` to regenerate .SRCINFO
+          5. Run `export` to copy changes back to `${{ matrix.update.package }}/`
+          6. Commit and create PR
+          
+          **IMPORTANT**: All edits and build commands operate on the WORKSPACE (`.cache/...`), 
+          NOT the package directory (`${{ matrix.update.package }}/`). Use `export` at the end 
+          to copy changes back.
           
           ## Important notes
           
-          - Build commands may take 5-10 minutes. Use `timeout: 600000` (10 min) for build/test bash commands.
-          - For Node.js packages, ensure PKGBUILD has `options=('!strip')` to avoid slow debug symbol processing.
+          - Build commands may take several minutes. Use `timeout: 900000` (15 min) for build/test bash commands.
           
           PROMPT_EOF
           
