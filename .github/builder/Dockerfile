@@ -22,6 +22,14 @@ RUN pacman -Syu --noconfirm && \
 RUN curl -fsSL https://opencode.ai/install | bash && \
     mv /root/.opencode/bin/opencode /usr/local/bin/opencode
 
+# Install mise
+RUN curl https://mise.run | sh && \
+    ln -s /root/.local/bin/mise /usr/local/bin/mise
+
+# Install jj via mise
+RUN /root/.local/bin/mise use -g jj@latest && \
+    ln -s /root/.local/share/mise/installs/jj/latest/jj /usr/local/bin/jj
+
 # Create builder user (non-root for makepkg)
 RUN useradd -m builder && \
     echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers

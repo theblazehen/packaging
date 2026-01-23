@@ -1,6 +1,5 @@
 [tools]
 jj = "latest"
-usage = "latest"
 
 [env]
 PACKAGING_ROOT = "{{config_root}}"
