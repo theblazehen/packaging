@@ -50,6 +50,12 @@ jobs:
             
             cd aur/$pkg
             
+            # Validate .aur-files exists
+            if [[ ! -f .aur-files ]]; then
+              echo "ERROR: .aur-files not found in aur/$pkg"
+              exit 1
+            fi
+            
             git clone ssh://aur@aur.archlinux.org/$pkg.git ../aur-$pkg-temp 2>/dev/null || {
               echo "New package, initializing..."
               mkdir -p ../aur-$pkg-temp
@@ -59,14 +65,26 @@ jobs:
               cd -
             }
             
-            # Copy only PKGBUILD and .SRCINFO (NOT mise.toml, AGENTS.md, etc)
-            cp PKGBUILD .SRCINFO ../aur-$pkg-temp/
+            # Copy files listed in .aur-files (fail if missing)
+            while IFS= read -r file || [[ -n "$file" ]]; do
+              # Skip empty lines and comments
+              [[ -z "$file" || "$file" == \#* ]] && continue
+              
+              if [[ ! -e "$file" ]]; then
+                echo "ERROR: File '$file' listed in .aur-files does not exist"
+                exit 1
+              fi
+              
+              cp -r "$file" ../aur-$pkg-temp/
+              echo "Copied: $file"
+            done < .aur-files
+            
             cd ../aur-$pkg-temp
             
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             
-            git add PKGBUILD .SRCINFO
+            git add -A
             
             COMMIT_MSG=$(git -C "$GITHUB_WORKSPACE" log --format=%s -1)
             

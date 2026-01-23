@@ -6,15 +6,30 @@ if [[ -z "$AUR_REMOTE" ]]; then
     exit 1
 fi
 
+if [[ ! -f "$PKG_DIR/.aur-files" ]]; then
+    echo "ERROR: .aur-files not found in $PKG_DIR"
+    exit 1
+fi
+
 cd "$WORKSPACE"
 
-# Ensure we have the latest from our package dir
-cp "$PKG_DIR/PKGBUILD" "$WORKSPACE/"
-cp "$PKG_DIR/.SRCINFO" "$WORKSPACE/"
+# Copy files listed in .aur-files (fail if missing)
+while IFS= read -r file || [[ -n "$file" ]]; do
+    # Skip empty lines and comments
+    [[ -z "$file" || "$file" == \#* ]] && continue
+    
+    if [[ ! -e "$PKG_DIR/$file" ]]; then
+        echo "ERROR: File '$file' listed in .aur-files does not exist"
+        exit 1
+    fi
+    
+    cp -r "$PKG_DIR/$file" "$WORKSPACE/"
+    echo "Copied: $file"
+done < "$PKG_DIR/.aur-files"
 
 # Stage and commit
 jj new -m "Update package"
-git add PKGBUILD .SRCINFO
+git add -A
 
 # Get commit message from parent repo's latest commit or use default
 COMMIT_MSG="${COMMIT_MSG:-Update $(date +%Y-%m-%d)}"

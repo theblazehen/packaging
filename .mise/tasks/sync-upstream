@@ -23,9 +23,23 @@ elif [[ "$PKG_TYPE" == "aur" ]]; then
     echo "Fetching from AUR..."
     jj git fetch origin 2>/dev/null || echo "No remote or new package"
     
-    # Sync our files
-    cp "$PKG_DIR/PKGBUILD" "$WORKSPACE/"
-    cp "$PKG_DIR/.SRCINFO" "$WORKSPACE/" 2>/dev/null || true
+    # Sync files listed in .aur-files
+    if [[ ! -f "$PKG_DIR/.aur-files" ]]; then
+        echo "ERROR: .aur-files not found in $PKG_DIR"
+        exit 1
+    fi
+    
+    while IFS= read -r file || [[ -n "$file" ]]; do
+        # Skip empty lines and comments
+        [[ -z "$file" || "$file" == \#* ]] && continue
+        
+        if [[ -e "$PKG_DIR/$file" ]]; then
+            cp -r "$PKG_DIR/$file" "$WORKSPACE/"
+            echo "Synced: $file"
+        else
+            echo "Note: $file not yet present (will be created)"
+        fi
+    done < "$PKG_DIR/.aur-files"
     
     echo "STATUS: SYNCED"
 fi
