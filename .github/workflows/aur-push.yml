@@ -6,6 +6,12 @@ on:
     paths:
       - 'aur/**/PKGBUILD'
       - 'aur/**/.SRCINFO'
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Space-separated list of packages to push (e.g., "ranger-git promptfoo")'
+        required: true
+        type: string
 
 jobs:
   push-to-aur:
@@ -33,13 +39,17 @@ jobs:
       - name: Determine changed packages
         id: changed
         run: |
-          packages=$(git diff --name-only HEAD~1 HEAD \
-            | grep '^aur/' \
-            | cut -d/ -f2 \
-            | sort -u \
-            | tr '\n' ' ')
+          if [[ -n "${{ inputs.packages }}" ]]; then
+            packages="${{ inputs.packages }}"
+          else
+            packages=$(git diff --name-only HEAD~1 HEAD \
+              | grep '^aur/' \
+              | cut -d/ -f2 \
+              | sort -u \
+              | tr '\n' ' ')
+          fi
           echo "packages=$packages" >> $GITHUB_OUTPUT
-          echo "Changed packages: $packages"
+          echo "Packages to push: $packages"
 
       - name: Push to AUR
         run: |
