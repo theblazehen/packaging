@@ -137,7 +137,7 @@ jobs:
             workspace-${{ matrix.update.package }}-
       
       - name: Setup workspace
-        run: mise -C ${{ matrix.update.package }} setup
+        run: mise -C ${{ matrix.update.package }} r setup
       
       - name: Fetch changelog
         id: changelog
@@ -167,7 +167,7 @@ jobs:
         id: sync
         continue-on-error: true
         run: |
-          mise -C ${{ matrix.update.package }} sync 2>&1 | tee /tmp/sync-output.txt
+          mise -C ${{ matrix.update.package }} r sync 2>&1 | tee /tmp/sync-output.txt
           echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
       
       - name: Try build (if sync succeeded)
@@ -175,11 +175,11 @@ jobs:
         if: steps.sync.outputs.exit_code == '0'
         continue-on-error: true
         run: |
-          mise -C ${{ matrix.update.package }} build 2>&1 | tee /tmp/build-output.txt
+          mise -C ${{ matrix.update.package }} r build 2>&1 | tee /tmp/build-output.txt
           echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
       
       - name: Gather all context
-        run: mise -C ${{ matrix.update.package }} gather-context > /tmp/full-context.txt
+        run: mise -C ${{ matrix.update.package }} r gather-context > /tmp/full-context.txt
       
       - name: Setup OpenCode config
         env:
@@ -230,13 +230,13 @@ jobs:
           
           ## Available mise tasks
           
-          - `mise -C ${{ matrix.update.package }} setup` - Initialize workspace
-          - `mise -C ${{ matrix.update.package }} sync` - Fetch and rebase
-          - `mise -C ${{ matrix.update.package }} build` - Build package
-          - `mise -C ${{ matrix.update.package }} test` - Test package
-          - `mise -C ${{ matrix.update.package }} export` - Export patches/files back
-          - `mise -C ${{ matrix.update.package }} checksums` - Update checksums (AUR)
-          - `mise -C ${{ matrix.update.package }} srcinfo` - Generate .SRCINFO (AUR)
+          - `mise -C ${{ matrix.update.package }} r setup` - Initialize workspace
+          - `mise -C ${{ matrix.update.package }} r sync` - Fetch and rebase
+          - `mise -C ${{ matrix.update.package }} r build` - Build package
+          - `mise -C ${{ matrix.update.package }} r test` - Test package
+          - `mise -C ${{ matrix.update.package }} r export` - Export patches/files back
+          - `mise -C ${{ matrix.update.package }} r checksums` - Update checksums (AUR)
+          - `mise -C ${{ matrix.update.package }} r srcinfo` - Generate .SRCINFO (AUR)
           
           ## Workspace location
           
