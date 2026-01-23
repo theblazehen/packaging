@@ -3,7 +3,7 @@
 
 FROM archlinux:latest
 
-# Install base packages
+# Install all packages from Arch repos
 RUN pacman -Syu --noconfirm && \
     pacman -S --noconfirm \
         base-devel \
@@ -17,26 +17,18 @@ RUN pacman -Syu --noconfirm && \
         namcap \
         curl \
         sudo \
+        mise \
+        jujutsu \
         && \
     pacman -Scc --noconfirm
 
 # Create builder user with UID 1001 (GitHub Actions runner UID)
-# This allows seamless file permissions with checkout/cache actions
 RUN useradd -m -u 1001 builder && \
     echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-# Install OpenCode
+# Install OpenCode (not in Arch repos)
 RUN curl -fsSL https://opencode.ai/install | bash && \
     mv /root/.opencode/bin/opencode /usr/local/bin/opencode
-
-# Install mise to /usr/local/bin for all users
-RUN curl https://mise.run | sh && \
-    mv /root/.local/bin/mise /usr/local/bin/mise
-
-# Install jj directly to /usr/local/bin (avoid per-user mise issues)
-RUN LATEST=$(curl -fsSL https://api.github.com/repos/jj-vcs/jj/releases/latest | jq -r .tag_name) && \
-    curl -fsSL "https://github.com/jj-vcs/jj/releases/download/${LATEST}/jj-${LATEST}-x86_64-unknown-linux-musl.tar.gz" | \
-    tar -xzf - --strip-components=0 -C /usr/local/bin/ ./jj
 
 # Setup SSH for AUR
 RUN mkdir -p /home/builder/.ssh && \
