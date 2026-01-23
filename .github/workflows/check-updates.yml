@@ -216,9 +216,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         run: |
-          cat > /tmp/prompt.md << 'PROMPT_EOF'
+          SYNC_STATUS="${{ steps.sync.outputs.exit_code == '0' && 'SUCCESS' || 'FAILED' }}"
+          BUILD_STATUS="${{ steps.build.outputs.exit_code == '0' && 'SUCCESS' || 'FAILED' }}"
+          
+          cat > /tmp/prompt.md << PROMPT_EOF
           # Update: ${{ matrix.update.package }}
           ## Version: ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
+          
+          ## Previous step results
+          
+          - **Sync**: ${SYNC_STATUS}
+          - **Build**: ${BUILD_STATUS}
           
           $(cat /tmp/full-context.txt)
           
@@ -226,35 +234,46 @@ jobs:
           
           ## Goal
           
-          Make this package build successfully with the new upstream version, 
-          then commit your changes and create a PR.
+          Update this package to the new version and create a PR.
+          
+          ### If build SUCCEEDED:
+          1. Review the build output for warnings, deprecations, or improvements worth addressing
+          2. Review the changelog for breaking changes, new dependencies, or security fixes
+          3. If improvements are needed, make them and rebuild
+          4. Run \`export\`, \`srcinfo\`, commit, and create PR
+          
+          ### If build FAILED:
+          1. Analyze the build logs to understand the failure
+          2. Fix the issue in the workspace PKGBUILD
+          3. Run \`checksums\` if you changed the version/source
+          4. Rebuild and verify it passes
+          5. Run \`export\`, \`srcinfo\`, commit, and create PR
+          
+          ### Things to look for even on success:
+          - Deprecation warnings that could be fixed now
+          - New optional dependencies mentioned upstream
+          - Security advisories requiring PKGBUILD changes
+          - Build warnings indicating future breakage
+          - Missing \`options=('!strip')\` for Node.js packages
           
           ## Available mise tasks
           
-          - `mise -C ${{ matrix.update.package }} r setup` - Initialize workspace
-          - `mise -C ${{ matrix.update.package }} r sync` - Copy files from package dir to workspace
-          - `mise -C ${{ matrix.update.package }} r build` - Build package
-          - `mise -C ${{ matrix.update.package }} r test` - Test package
-          - `mise -C ${{ matrix.update.package }} r export` - Copy workspace files back to package dir
-          - `mise -C ${{ matrix.update.package }} r checksums` - Update checksums in PKGBUILD
-          - `mise -C ${{ matrix.update.package }} r srcinfo` - Generate .SRCINFO
+          - \`mise -C ${{ matrix.update.package }} r setup\` - Initialize workspace
+          - \`mise -C ${{ matrix.update.package }} r sync\` - Copy files from package dir to workspace
+          - \`mise -C ${{ matrix.update.package }} r build\` - Build package
+          - \`mise -C ${{ matrix.update.package }} r test\` - Test package  
+          - \`mise -C ${{ matrix.update.package }} r export\` - Copy workspace files back to package dir
+          - \`mise -C ${{ matrix.update.package }} r checksums\` - Update checksums in PKGBUILD
+          - \`mise -C ${{ matrix.update.package }} r srcinfo\` - Generate .SRCINFO
           
-          ## Workflow for AUR packages
+          ## Workspace
           
-          1. Edit PKGBUILD in workspace: `.cache/${{ matrix.update.package }}/PKGBUILD`
-          2. Run `checksums` to update sha256sums
-          3. Run `build` to test the build (use timeout: 900000)
-          4. Run `srcinfo` to regenerate .SRCINFO
-          5. Run `export` to copy changes back to `${{ matrix.update.package }}/`
-          6. Commit and create PR
+          All edits and builds operate on: \`.cache/${{ matrix.update.package }}/\`
+          Use \`export\` to copy changes back to \`${{ matrix.update.package }}/\` before committing.
           
-          **IMPORTANT**: All edits and build commands operate on the WORKSPACE (`.cache/...`), 
-          NOT the package directory (`${{ matrix.update.package }}/`). Use `export` at the end 
-          to copy changes back.
+          ## Notes
           
-          ## Important notes
-          
-          - Build commands may take several minutes. Use `timeout: 900000` (15 min) for build/test bash commands.
+          - Use \`timeout: 900000\` (15 min) for build/test commands.
           
           PROMPT_EOF
           
