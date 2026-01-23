@@ -134,3 +134,4 @@ source = "github"
 github = "yacy/yacy_search_server"
 use_max_tag = true
 prefix = "Release_"
+sort_version_key = "vercmp"
