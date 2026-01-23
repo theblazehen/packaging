@@ -36,7 +36,7 @@ RUN curl https://mise.run | sh && \
 # Install jj directly to /usr/local/bin (avoid per-user mise issues)
 RUN LATEST=$(curl -fsSL https://api.github.com/repos/jj-vcs/jj/releases/latest | jq -r .tag_name) && \
     curl -fsSL "https://github.com/jj-vcs/jj/releases/download/${LATEST}/jj-${LATEST}-x86_64-unknown-linux-musl.tar.gz" | \
-    tar -xzf - -C /usr/local/bin/ jj
+    tar -xzf - --strip-components=0 -C /usr/local/bin/ ./jj
 
 # Setup SSH for AUR
 RUN mkdir -p /home/builder/.ssh && \
