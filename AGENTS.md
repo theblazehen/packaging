@@ -77,6 +77,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 
 ## Global Policies
 - **License**: Ensure proper SPDX identifiers
+- **Checksums**: NEVER use 'SKIP' for checksums. Always use proper sha256sums (run `updpkgsums`)
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 

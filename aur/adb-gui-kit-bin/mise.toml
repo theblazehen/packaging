@@ -1,0 +1,22 @@
+[tasks.build]
+description = "Build adb-gui-kit-bin package"
+run = "makepkg -sf"
+
+[tasks.test]
+description = "Install and test adb-gui-kit-bin"
+run = """
+sudo pacman -U --noconfirm adb-gui-kit-bin-*.pkg.tar*
+adb-gui-kit --help || true
+"""
+
+[tasks.lint]
+description = "Run namcap on package"
+run = "namcap PKGBUILD && namcap adb-gui-kit-bin-*.pkg.tar* 2>/dev/null || true"
+
+[tasks.srcinfo]
+description = "Generate .SRCINFO"
+run = "makepkg --printsrcinfo > .SRCINFO"
+
+[tasks.push]
+description = "Push to AUR"
+run = "mise run -w ../.. aur-push aur/adb-gui-kit-bin"

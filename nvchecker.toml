@@ -69,6 +69,34 @@ github = "ArweaveTeam/arweave-deploy"
 use_max_tag = true
 prefix = "v"
 
+["aur/blivet-gui"]
+source = "github"
+github = "storaged-project/blivet-gui"
+use_max_tag = true
+
+["aur/adb-gui-kit-bin"]
+source = "github"
+github = "Drenzzz/adb-gui-kit"
+use_latest_release = true
+prefix = "v"
+
+["aur/komac"]
+source = "github"
+github = "russellbanks/Komac"
+use_latest_release = true
+prefix = "v"
+
+["aur/comaps"]
+source = "regex"
+url = "https://codeberg.org/comaps/comaps/releases"
+regex = "v(\\d{4}\\.\\d+\\.\\d+)-\\d+"
+
+["aur/slackdump-bin"]
+source = "github"
+github = "rusq/slackdump"
+use_latest_release = true
+prefix = "v"
+
 # ═══════════════════════════════════════════════════════════════════
 # AUR: Git HEAD (-git packages)
 # Version format from pkgver(): r<count>.<shorthash>

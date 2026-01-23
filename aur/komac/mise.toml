@@ -1,0 +1,22 @@
+[tasks.build]
+description = "Build komac package"
+run = "makepkg -sf"
+
+[tasks.test]
+description = "Install and test komac"
+run = """
+sudo pacman -U --noconfirm komac-*.pkg.tar*
+komac --version
+"""
+
+[tasks.lint]
+description = "Run namcap on package"
+run = "namcap PKGBUILD && namcap komac-*.pkg.tar* 2>/dev/null || true"
+
+[tasks.srcinfo]
+description = "Generate .SRCINFO"
+run = "makepkg --printsrcinfo > .SRCINFO"
+
+[tasks.push]
+description = "Push to AUR"
+run = "mise run -w ../.. aur-push aur/komac"

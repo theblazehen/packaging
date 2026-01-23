@@ -1,0 +1,22 @@
+[tasks.build]
+description = "Build comaps package"
+run = "makepkg -sf"
+
+[tasks.test]
+description = "Install and test comaps"
+run = """
+sudo pacman -U --noconfirm comaps-*.pkg.tar*
+comaps --help || true
+"""
+
+[tasks.lint]
+description = "Run namcap on package"
+run = "namcap PKGBUILD && namcap comaps-*.pkg.tar* 2>/dev/null || true"
+
+[tasks.srcinfo]
+description = "Generate .SRCINFO"
+run = "makepkg --printsrcinfo > .SRCINFO"
+
+[tasks.push]
+description = "Push to AUR"
+run = "mise run -w ../.. aur-push aur/comaps"
