@@ -125,6 +125,11 @@ source = "git"
 git = "https://github.com/amodi444/scrapfetch.git"
 use_commit = true
 
+["aur/jdwp-mcp-git"]
+source = "git"
+git = "https://github.com/navicore/jdwp-mcp.git"
+use_commit = true
+
 # ═══════════════════════════════════════════════════════════════════
 # AUR: Java Applications
 # ═══════════════════════════════════════════════════════════════════

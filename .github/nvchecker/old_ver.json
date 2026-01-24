@@ -76,6 +76,10 @@
       "version": "238880f838fd5e29cd8796cb9461ac3f3fef6ace",
       "revision": "238880f838fd5e29cd8796cb9461ac3f3fef6ace"
     },
+    "aur/jdwp-mcp-git": {
+      "version": "7f41d941888da31cf3e0dd55e1b12693d982e7d0",
+      "revision": "7f41d941888da31cf3e0dd55e1b12693d982e7d0"
+    },
     "aur/slackdump-bin": {
       "version": "3.1.11",
       "gitref": "refs/tags/v3.1.11",

@@ -81,7 +81,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 
-## Current Packages (13 total)
+## Current Packages (14 total)
 
 | Package | Type | Source |
 |---------|------|--------|
@@ -98,6 +98,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 | blender-mcp-git | git | `ahgsql/blender-mcp` |
 | lazybeads-git | git | `theblazehen/lazybeads` |
 | fractalart-git | git | `theblazehen/FractalArt` |
+| jdwp-mcp-git | git | `navicore/jdwp-mcp` |
 
 ## Package Files
 
