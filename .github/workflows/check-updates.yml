@@ -267,6 +267,46 @@ jobs:
           PROMPT_EOF
           
           opencode run "$(cat /tmp/prompt.md)"
+      
+      - name: Create issue on failure
+        if: failure() || cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="${{ matrix.update.package }}: update to ${{ matrix.update.new_version }} failed"
+          
+          # Check if issue already exists
+          EXISTING=$(gh issue list --search "in:title \"$TITLE\"" --state open --json number --jq '.[0].number // empty')
+          if [[ -n "$EXISTING" ]]; then
+            echo "Issue #$EXISTING already exists, skipping"
+            exit 0
+          fi
+          
+          # Determine failure reason
+          if [[ "${{ job.status }}" == "cancelled" ]]; then
+            REASON="Job was cancelled (likely due to timeout)"
+          else
+            REASON="Job failed during execution"
+          fi
+          
+          cat > /tmp/issue-body.md << 'ISSUE_EOF'
+          ## Update Failed
+          
+          **Package**: `${{ matrix.update.package }}`
+          **Version**: ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
+          **Reason**: REASON_PLACEHOLDER
+          
+          ### Workflow Run
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          ### Next Steps
+          1. Check the workflow logs for details
+          2. Fix the issue manually or wait for upstream fix
+          3. Close this issue when resolved
+          ISSUE_EOF
+          
+          sed -i "s/REASON_PLACEHOLDER/$REASON/" /tmp/issue-body.md
+          gh issue create --title "$TITLE" --body-file /tmp/issue-body.md
 
   update-nvchecker-state:
     needs: [detect-updates, update-package]
