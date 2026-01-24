@@ -1,17 +1,8 @@
-From 727244b03a099299c4ac30224aefa73c99a360b1 Mon Sep 17 00:00:00 2001
-From: Jasmin Le Roux <theblazehen@gmail.com>
-Date: Mon, 12 Jan 2026 16:53:01 +0200
-Subject: [PATCH 5/7] Add beads task tracking for AI agents
-
----
- Dockerfile | 4 ++++
- 1 file changed, 4 insertions(+)
-
 diff --git a/Dockerfile b/Dockerfile
-index 1af231870..0bd72df09 100644
+index 1af2318709..0bd72df09b 100644
 --- a/Dockerfile
 +++ b/Dockerfile
-@@ -22,6 +22,10 @@ RUN apt-get update && \
+@@ -22,6 +22,10 @@
  RUN curl -LsSf https://astral.sh/uv/install.sh | sh
  ENV PATH="/root/.local/bin:${PATH}"
  
@@ -22,6 +13,3 @@ index 1af231870..0bd72df09 100644
  COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
  COPY ui/package.json ./ui/package.json
  COPY patches ./patches
--- 
-2.52.0
-

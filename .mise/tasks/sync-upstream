@@ -5,7 +5,7 @@ cd "$WORKSPACE"
 
 if [[ "$PKG_TYPE" == "docker" ]]; then
     echo "Fetching upstream..."
-    jj git fetch upstream
+    jj git fetch --remote upstream
     
     echo "Rebasing patches onto upstream..."
     jj rebase -d main@upstream 2>&1 || true
@@ -21,7 +21,7 @@ if [[ "$PKG_TYPE" == "docker" ]]; then
 
 elif [[ "$PKG_TYPE" == "aur" ]]; then
     echo "Fetching from AUR..."
-    jj git fetch origin 2>/dev/null || echo "No remote or new package"
+    jj git fetch --remote origin 2>/dev/null || echo "No remote or new package"
     
     # Sync files listed in .aur-files
     if [[ ! -f "$PKG_DIR/.aur-files" ]]; then

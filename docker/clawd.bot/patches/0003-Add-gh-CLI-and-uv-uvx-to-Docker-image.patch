@@ -1,17 +1,8 @@
-From 8c65da075fff5ee199adbcfbb53c9d32b1c2bcf3 Mon Sep 17 00:00:00 2001
-From: Jasmin Le Roux <theblazehen@gmail.com>
-Date: Sun, 11 Jan 2026 19:01:57 +0200
-Subject: [PATCH 3/7] Add gh CLI and uv/uvx to Docker image
-
----
- Dockerfile | 18 ++++++++++++------
- 1 file changed, 12 insertions(+), 6 deletions(-)
-
 diff --git a/Dockerfile b/Dockerfile
-index a33f0077d..1af231870 100644
+index a33f0077de..1af2318709 100644
 --- a/Dockerfile
 +++ b/Dockerfile
-@@ -9,12 +9,18 @@ RUN corepack enable
+@@ -9,12 +9,18 @@
  WORKDIR /app
  
  ARG CLAWDBOT_DOCKER_APT_PACKAGES=""
@@ -36,6 +27,3 @@ index a33f0077d..1af231870 100644
  
  COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
  COPY ui/package.json ./ui/package.json
--- 
-2.52.0
-
