@@ -2,3 +2,4 @@ PKGBUILD
 .SRCINFO
 comaps.desktop
 icon.svg
+relax-protobuf-version.patch
