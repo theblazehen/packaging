@@ -30,6 +30,15 @@ RUN useradd -m -u 1001 builder && \
 RUN curl -fsSL https://opencode.ai/install | bash && \
     mv /root/.opencode/bin/opencode /usr/local/bin/opencode
 
+# Install yay (AUR helper) as builder user
+USER builder
+WORKDIR /tmp
+RUN git clone https://aur.archlinux.org/yay-bin.git && \
+    cd yay-bin && \
+    makepkg -si --noconfirm && \
+    cd .. && rm -rf yay-bin
+USER root
+
 # Setup SSH for AUR
 RUN mkdir -p /home/builder/.ssh && \
     chmod 700 /home/builder/.ssh && \
