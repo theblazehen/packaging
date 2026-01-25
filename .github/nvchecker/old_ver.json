@@ -41,15 +41,19 @@
       "url": "https://github.com/mylee04/code-notify/releases/tag/v1.3.0"
     },
     "aur/comaps": {
-      "version": "2026.01.08"
+      "version": "2026.01.24"
     },
     "aur/fractalart-git": {
       "version": "e741eb250054d5baeb0715fbbaeb91f8cb254eb3",
       "revision": "e741eb250054d5baeb0715fbbaeb91f8cb254eb3"
     },
+    "aur/jdwp-mcp-git": {
+      "version": "7f41d941888da31cf3e0dd55e1b12693d982e7d0",
+      "revision": "7f41d941888da31cf3e0dd55e1b12693d982e7d0"
+    },
     "aur/kimaki": {
-      "version": "0.4.43",
-      "url": "https://www.npmjs.com/package/kimaki/v/0.4.43"
+      "version": "0.4.44",
+      "url": "https://www.npmjs.com/package/kimaki/v/0.4.44"
     },
     "aur/komac": {
       "version": "2.15.0",
@@ -61,8 +65,8 @@
       "revision": "c8d1bfe8e800082c257274f40f0f799835e155e1"
     },
     "aur/openchamber": {
-      "version": "1.5.5",
-      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.5.5"
+      "version": "1.5.7",
+      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.5.7"
     },
     "aur/promptfoo": {
       "version": "0.120.17",
@@ -76,10 +80,6 @@
       "version": "238880f838fd5e29cd8796cb9461ac3f3fef6ace",
       "revision": "238880f838fd5e29cd8796cb9461ac3f3fef6ace"
     },
-    "aur/jdwp-mcp-git": {
-      "version": "7f41d941888da31cf3e0dd55e1b12693d982e7d0",
-      "revision": "7f41d941888da31cf3e0dd55e1b12693d982e7d0"
-    },
     "aur/slackdump-bin": {
       "version": "3.1.11",
       "gitref": "refs/tags/v3.1.11",
@@ -92,8 +92,8 @@
       "url": "https://github.com/phillbush/xmenu/releases/tag/v4.6.1"
     },
     "docker/clawd.bot": {
-      "version": "40181afdedb04ce05f9d28d0a34440e810e8c07e",
-      "revision": "40181afdedb04ce05f9d28d0a34440e810e8c07e"
+      "version": "c6cdbb630c926b0be95921ba55cd6127f9fd1f56",
+      "revision": "c6cdbb630c926b0be95921ba55cd6127f9fd1f56"
     }
   }
 }
