@@ -18,7 +18,20 @@ depends = ["setup"]
 run = "{{env.PACKAGING_ROOT}}/.mise/tasks/sync-upstream"
 
 [tasks.build]
-description = "Build AUR package"
+description = "Build AUR package (skipped in CI)"
+run = '''
+#!/usr/bin/env bash
+if [[ "${CI:-}" == "true" ]]; then
+  echo "⏭️  Skipping build in CI (comaps takes 30+ min to build)"
+  echo "Build will happen on user machines via AUR"
+  exit 0
+fi
+cd "$WORKSPACE"
+makepkg -sf
+'''
+
+[tasks.build-local]
+description = "Actually build the package (local only)"
 run = '''
 #!/usr/bin/env bash
 cd "$WORKSPACE"
