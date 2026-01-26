@@ -9,10 +9,12 @@ newver = ".github/nvchecker/new_ver.json"
 # Docker packages (track git commits - we patch the source)
 # ═══════════════════════════════════════════════════════════════════
 
-["docker/clawd.bot"]
-source = "git"
-git = "https://github.com/clawdbot/clawdbot.git"
-use_commit = true
+
+# disable
+#["docker/clawd.bot"]
+#source = "git"
+#git = "https://github.com/clawdbot/clawdbot.git"
+#use_commit = true
 
 # ═══════════════════════════════════════════════════════════════════
 # AUR: NPM Packages
