@@ -52,8 +52,8 @@
       "revision": "7f41d941888da31cf3e0dd55e1b12693d982e7d0"
     },
     "aur/kimaki": {
-      "version": "0.4.46",
-      "url": "https://www.npmjs.com/package/kimaki/v/0.4.46"
+      "version": "0.4.47",
+      "url": "https://www.npmjs.com/package/kimaki/v/0.4.47"
     },
     "aur/komac": {
       "version": "2.15.0",
@@ -65,8 +65,8 @@
       "revision": "c8d1bfe8e800082c257274f40f0f799835e155e1"
     },
     "aur/openchamber": {
-      "version": "1.5.7",
-      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.5.7"
+      "version": "1.5.8",
+      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.5.8"
     },
     "aur/promptfoo": {
       "version": "0.120.17",
@@ -90,10 +90,6 @@
       "gitref": "refs/tags/v4.6.1",
       "revision": "55298b5d8e56fbfe213a9095a5a84e1ff779a5bc",
       "url": "https://github.com/phillbush/xmenu/releases/tag/v4.6.1"
-    },
-    "docker/clawd.bot": {
-      "version": "58949a1f9584bc3323c93ae85ebea6c1a069914b",
-      "revision": "58949a1f9584bc3323c93ae85ebea6c1a069914b"
     }
   }
 }
