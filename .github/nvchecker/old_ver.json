@@ -32,8 +32,8 @@
       "url": "https://www.npmjs.com/package/ccstatusline/v/2.0.23"
     },
     "aur/claude-code-ui": {
-      "version": "1.14.0",
-      "url": "https://www.npmjs.com/package/@siteboon/claude-code-ui/v/1.14.0"
+      "version": "1.15.0",
+      "url": "https://www.npmjs.com/package/@siteboon/claude-code-ui/v/1.15.0"
     },
     "aur/code-notify": {
       "version": "1.4.0",
@@ -52,8 +52,8 @@
       "revision": "7f41d941888da31cf3e0dd55e1b12693d982e7d0"
     },
     "aur/kimaki": {
-      "version": "0.4.47",
-      "url": "https://www.npmjs.com/package/kimaki/v/0.4.47"
+      "version": "0.4.51",
+      "url": "https://www.npmjs.com/package/kimaki/v/0.4.51"
     },
     "aur/komac": {
       "version": "2.15.0",
@@ -65,12 +65,12 @@
       "revision": "c8d1bfe8e800082c257274f40f0f799835e155e1"
     },
     "aur/openchamber": {
-      "version": "1.5.9",
-      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.5.9"
+      "version": "1.6.0",
+      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.6.0"
     },
     "aur/promptfoo": {
-      "version": "0.120.17",
-      "url": "https://www.npmjs.com/package/promptfoo/v/0.120.17"
+      "version": "0.120.20",
+      "url": "https://www.npmjs.com/package/promptfoo/v/0.120.20"
     },
     "aur/ranger-git": {
       "version": "46c4fde3831dcf00ed85ee4e089df28601932229",
