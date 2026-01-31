@@ -1,0 +1,18 @@
+# Build artifacts
+src/
+pkg/
+*.pkg.tar.zst
+*.tar.gz
+
+# Logs
+*.log
+
+# Downloaded sources
+screenpipe-*
+LICENSE-*
+README-*
+TESTING-*
+CONTRIBUTING-*
+
+# nvchecker (we use repo-level config)
+.nvchecker.toml

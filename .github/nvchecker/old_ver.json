@@ -95,6 +95,11 @@
       "gitref": "refs/tags/v4.6.1",
       "revision": "55298b5d8e56fbfe213a9095a5a84e1ff779a5bc",
       "url": "https://github.com/phillbush/xmenu/releases/tag/v4.6.1"
+    },
+    "aur/screenpipe-bin": {
+      "version": "0.2.74",
+      "gitref": "refs/tags/v0.2.74",
+      "url": "https://github.com/mediar-ai/screenpipe/releases/tag/v0.2.74"
     }
   }
 }

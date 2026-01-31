@@ -142,6 +142,13 @@ github = "ovrport/app"
 use_latest_release = true
 prefix = "v"
 
+["aur/screenpipe-bin"]
+source = "github"
+github = "mediar-ai/screenpipe"
+use_max_tag = true
+prefix = "v"
+include_regex = "^v\\d"  # Only v* tags, not mcp-v*
+
 ["aur/yacy"]
 source = "github"
 github = "yacy/yacy_search_server"
