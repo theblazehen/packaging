@@ -1,0 +1,16 @@
+# Build artifacts
+src/
+pkg/
+*.pkg.tar.zst
+*.tar.gz
+*.tgz
+
+# Logs
+*.log
+
+# Downloaded sources
+tuitube-*
+README-*
+
+# nvchecker (we use repo-level config)
+.nvchecker.toml

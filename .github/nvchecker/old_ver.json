@@ -100,6 +100,10 @@
       "version": "0.2.74",
       "gitref": "refs/tags/v0.2.74",
       "url": "https://github.com/mediar-ai/screenpipe/releases/tag/v0.2.74"
+    },
+    "aur/tuitube-bin": {
+      "version": "202601102121",
+      "url": "https://github.com/remorses/tuitube/releases/tag/tuitube%40202601102121"
     }
   }
 }

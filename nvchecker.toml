@@ -149,6 +149,12 @@ use_max_tag = true
 prefix = "v"
 include_regex = "^v\\d"  # Only v* tags, not mcp-v*
 
+["aur/tuitube-bin"]
+source = "github"
+github = "remorses/tuitube"
+use_latest_release = true
+prefix = "tuitube@"
+
 ["aur/yacy"]
 source = "github"
 github = "yacy/yacy_search_server"
