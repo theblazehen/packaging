@@ -102,6 +102,32 @@ jobs:
         with:
           name: nvchecker-state
           path: .github/nvchecker/new_ver.json
+      
+      - name: Export new version info per package
+        id: export-versions
+        run: |
+          # Extract per-package version info for use in update-package job
+          python3 << 'PYEOF'
+          import json
+          import os
+          
+          with open('.github/nvchecker/new_ver.json') as f:
+              data = json.load(f)
+          
+          # Write individual version files for each package
+          os.makedirs('/tmp/pkg-versions', exist_ok=True)
+          for pkg, info in data.get('data', data).items():
+              safe_name = pkg.replace('/', '_')
+              with open(f'/tmp/pkg-versions/{safe_name}.json', 'w') as f:
+                  json.dump({pkg: info}, f)
+          PYEOF
+      
+      - name: Upload per-package versions
+        uses: actions/upload-artifact@v4
+        if: ${{ !env.ACT }}
+        with:
+          name: pkg-versions
+          path: /tmp/pkg-versions/
 
   update-package:
     needs: detect-updates
@@ -139,6 +165,12 @@ jobs:
       
       - name: Setup workspace
         run: mise -C ${{ matrix.update.package }} r setup
+      
+      - name: Download package version info
+        uses: actions/download-artifact@v4
+        with:
+          name: pkg-versions
+          path: /tmp/pkg-versions/
       
       - name: Fetch changelog
         id: changelog
@@ -262,7 +294,8 @@ jobs:
           
           ## Notes
           
-          - Use \`timeout: 900000\` (15 min) for build/test commands.
+          - Use \\`timeout: 900000\\` (15 min) for build/test commands.
+          - **IMPORTANT**: After committing package changes, also update \\`.github/nvchecker/old_ver.json\\` with the new version for this package. Use the version info from \\`/tmp/pkg-versions/${{ matrix.update.package | replace('/', '_') }}.json\\` and merge it into \\`old_ver.json\\`. Include this in the same PR commit.
           
           PROMPT_EOF
           
@@ -307,43 +340,3 @@ jobs:
           
           sed -i "s/REASON_PLACEHOLDER/$REASON/" /tmp/issue-body.md
           gh issue create --title "$TITLE" --body-file /tmp/issue-body.md
-
-  update-nvchecker-state:
-    needs: [detect-updates, update-package]
-    if: always() && needs.detect-updates.result == 'success'
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Download nvchecker state
-        uses: actions/download-artifact@v4
-        with:
-          name: nvchecker-state
-          path: .github/nvchecker/
-        continue-on-error: true
-      
-      - name: Update state file
-        run: |
-          if [[ -f .github/nvchecker/new_ver.json ]]; then
-            cp .github/nvchecker/new_ver.json .github/nvchecker/old_ver.json
-            
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add .github/nvchecker/old_ver.json
-            
-            if ! git diff --staged --quiet; then
-              git commit -m "chore: update nvchecker version state"
-              
-              # Retry push with rebase to handle race condition from auto-merged PRs
-              for i in 1 2 3 4 5; do
-                if git push; then
-                  echo "Push succeeded on attempt $i"
-                  break
-                fi
-                echo "Push failed (attempt $i), pulling and rebasing..."
-                git pull --rebase
-                sleep $((i * 2))
-              done
-            fi
-          fi
