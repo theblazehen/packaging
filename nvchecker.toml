@@ -136,6 +136,12 @@ use_commit = true
 # AUR: Java Applications
 # ═══════════════════════════════════════════════════════════════════
 
+["aur/ovrport-bin"]
+source = "github"
+github = "ovrport/app"
+use_latest_release = true
+prefix = "v"
+
 ["aur/yacy"]
 source = "github"
 github = "yacy/yacy_search_server"

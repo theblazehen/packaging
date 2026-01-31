@@ -234,7 +234,7 @@ jobs:
           4. Review build output for warnings worth fixing
           5. Run \`srcinfo\` to regenerate .SRCINFO
           6. Run \`export\` to copy changes back to package dir
-          7. Commit and create PR
+          7. Commit and create PR with auto-merge enabled (use \`gh pr create\` then \`gh pr merge --auto --squash\`)
           
           **DO NOT** rebuild if the build already succeeded unless you made changes that require it.
           

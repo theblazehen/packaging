@@ -68,6 +68,11 @@
       "version": "1.6.1",
       "url": "https://www.npmjs.com/package/@openchamber/web/v/1.6.1"
     },
+    "aur/ovrport-bin": {
+      "version": "1.2.2",
+      "gitref": "refs/tags/v1.2.2",
+      "url": "https://github.com/ovrport/app/releases/tag/v1.2.2"
+    },
     "aur/promptfoo": {
       "version": "0.120.20",
       "url": "https://www.npmjs.com/package/promptfoo/v/0.120.20"
