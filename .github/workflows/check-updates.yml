@@ -334,6 +334,16 @@ jobs:
             
             if ! git diff --staged --quiet; then
               git commit -m "chore: update nvchecker version state"
-              git push
+              
+              # Retry push with rebase to handle race condition from auto-merged PRs
+              for i in 1 2 3 4 5; do
+                if git push; then
+                  echo "Push succeeded on attempt $i"
+                  break
+                fi
+                echo "Push failed (attempt $i), pulling and rebasing..."
+                git pull --rebase
+                sleep $((i * 2))
+              done
             fi
           fi
