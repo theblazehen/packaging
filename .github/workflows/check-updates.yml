@@ -295,7 +295,7 @@ jobs:
           ## Notes
           
           - Use \\`timeout: 900000\\` (15 min) for build/test commands.
-          - **IMPORTANT**: After committing package changes, also update \\`.github/nvchecker/old_ver.json\\` with the new version for this package. Use the version info from \\`/tmp/pkg-versions/${{ matrix.update.package | replace('/', '_') }}.json\\` and merge it into \\`old_ver.json\\`. Include this in the same PR commit.
+          - **IMPORTANT**: After committing package changes, also update \\`.github/nvchecker/old_ver.json\\` with the new version for this package. The version info file is at \\`/tmp/pkg-versions/\\` with the package name having \\`/\\` replaced by \\`_\\` (e.g., \\`aur_promptfoo.json\\` for \\`aur/promptfoo\\`). Merge this into \\`old_ver.json\\`. Include this in the same PR commit.
           
           PROMPT_EOF
           
