@@ -36,9 +36,9 @@
       "url": "https://www.npmjs.com/package/@siteboon/claude-code-ui/v/1.16.3"
     },
     "aur/code-notify": {
-      "version": "1.4.2",
-      "gitref": "refs/tags/v1.4.2",
-      "url": "https://github.com/mylee04/code-notify/releases/tag/v1.4.2"
+      "version": "1.4.3",
+      "gitref": "refs/tags/v1.4.3",
+      "url": "https://github.com/mylee04/code-notify/releases/tag/v1.4.3"
     },
     "aur/comaps": {
       "version": "2026.01.24"
