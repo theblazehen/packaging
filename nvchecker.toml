@@ -155,6 +155,18 @@ github = "remorses/tuitube"
 use_latest_release = true
 prefix = "tuitube@"
 
+["aur/caire"]
+source = "github"
+github = "esimov/caire"
+use_max_tag = true
+prefix = "v"
+
+["aur/yt-beats"]
+source = "github"
+github = "krishnakanthb13/yt-beats"
+use_latest_release = true
+prefix = "v"
+
 ["aur/yacy"]
 source = "github"
 github = "yacy/yacy_search_server"

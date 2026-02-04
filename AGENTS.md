@@ -81,7 +81,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 
-## Current Packages (14 total)
+## Current Packages (16 total)
 
 | Package | Type | Source |
 |---------|------|--------|
@@ -95,6 +95,8 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 | bdui-bin | GitHub | `AnubhabB/retaurant-llm` |
 | xmenu | GitHub | `phillbush/xmenu` |
 | arweave-deploy-bin | GitHub | `ArweaveTeam/arweave-deploy` |
+| caire | GitHub | `esimov/caire` |
+| yt-beats | GitHub | `krishnakanthb13/yt-beats` |
 | blender-mcp-git | git | `ahgsql/blender-mcp` |
 | lazybeads-git | git | `theblazehen/lazybeads` |
 | fractalart-git | git | `theblazehen/FractalArt` |

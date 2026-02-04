@@ -104,6 +104,16 @@
     "aur/tuitube-bin": {
       "version": "202601102121",
       "url": "https://github.com/remorses/tuitube/releases/tag/tuitube%40202601102121"
+    },
+    "aur/caire": {
+      "version": "1.5.0",
+      "gitref": "refs/tags/v1.5.0",
+      "url": "https://github.com/esimov/caire/releases/tag/v1.5.0"
+    },
+    "aur/yt-beats": {
+      "version": "0.0.16",
+      "gitref": "refs/tags/v0.0.16",
+      "url": "https://github.com/krishnakanthb13/yt-beats/releases/tag/v0.0.16"
     }
   }
 }
