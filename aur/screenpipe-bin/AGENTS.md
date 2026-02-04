@@ -1,13 +1,13 @@
 # Package: screenpipe-bin
 
 ## Upstream
-- Repository: https://github.com/mediar-ai/screenpipe
+- Repository: https://github.com/screenpipe/screenpipe
 - Type: Pre-built Rust binary
 - Version tracking: GitHub releases (v* tags, not mcp-v* tags)
 
 ## Update Detection
 ```bash
-curl -s https://api.github.com/repos/mediar-ai/screenpipe/releases | jq -r '[.[] | select(.tag_name | startswith("v"))][0].tag_name'
+curl -s https://api.github.com/repos/screenpipe/screenpipe/releases | jq -r '[.[] | select(.tag_name | startswith("v"))][0].tag_name'
 ```
 
 ## Update Instructions

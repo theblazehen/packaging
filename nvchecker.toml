@@ -144,7 +144,7 @@ prefix = "v"
 
 ["aur/screenpipe-bin"]
 source = "github"
-github = "mediar-ai/screenpipe"
+github = "screenpipe/screenpipe"
 use_max_tag = true
 prefix = "v"
 include_regex = "^v\\d"  # Only v* tags, not mcp-v*
