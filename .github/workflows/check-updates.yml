@@ -341,18 +341,10 @@ jobs:
             exit 0
           fi
           
-          # Setup SSH
+          # Write SSH key to path the container's SSH config already expects
           mkdir -p ~/.ssh
-          echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
-          chmod 600 ~/.ssh/aur
-          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
-          
-          cat >> ~/.ssh/config << 'SSHEOF'
-          Host aur.archlinux.org
-            IdentityFile ~/.ssh/aur
-            User aur
-            IdentitiesOnly yes
-          SSHEOF
+          echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur_key
+          chmod 600 ~/.ssh/aur_key
           
           # Pull latest main (post-merge)
           git fetch origin main
