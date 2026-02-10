@@ -341,10 +341,11 @@ jobs:
             exit 0
           fi
           
-          # Write SSH key to path the container's SSH config already expects
-          mkdir -p ~/.ssh
-          echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur_key
-          chmod 600 ~/.ssh/aur_key
+          # Write SSH key to absolute path that the container's SSH config expects
+          # (~ resolves to /github/home in GHA container jobs, but SSH config has /home/builder)
+          mkdir -p /home/builder/.ssh
+          echo "$AUR_SSH_PRIVATE_KEY" > /home/builder/.ssh/aur_key
+          chmod 600 /home/builder/.ssh/aur_key
           
           # Pull latest main (post-merge)
           git fetch origin main
