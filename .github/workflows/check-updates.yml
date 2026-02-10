@@ -301,6 +301,102 @@ jobs:
           
           opencode run "$(cat /tmp/prompt.md)"
       
+      - name: Push to AUR
+        if: success()
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          # Wait for auto-merge to complete (gh pr merge --auto is async)
+          PKG_NAME=$(echo "${{ matrix.update.package }}" | cut -d/ -f2)
+          
+          # Find the PR we just created
+          PR_NUM=$(gh pr list --head "${{ matrix.update.package }}/${{ matrix.update.new_version }}" --json number --jq '.[0].number // empty' 2>/dev/null || true)
+          if [[ -z "$PR_NUM" ]]; then
+            PR_NUM=$(gh pr list --state merged --search "$PKG_NAME ${{ matrix.update.new_version }}" --json number --jq '.[0].number // empty' 2>/dev/null || true)
+          fi
+          
+          if [[ -z "$PR_NUM" ]]; then
+            echo "No PR found, skipping AUR push"
+            exit 0
+          fi
+          
+          echo "Found PR #$PR_NUM, waiting for merge..."
+          
+          # Poll for merge (auto-merge is async, may take a moment)
+          for i in $(seq 1 30); do
+            STATE=$(gh pr view "$PR_NUM" --json state --jq '.state')
+            if [[ "$STATE" == "MERGED" ]]; then
+              echo "PR #$PR_NUM merged!"
+              break
+            elif [[ "$STATE" == "CLOSED" ]]; then
+              echo "PR #$PR_NUM was closed without merge, skipping"
+              exit 0
+            fi
+            echo "PR state: $STATE, waiting... ($i/30)"
+            sleep 10
+          done
+          
+          if [[ "$STATE" != "MERGED" ]]; then
+            echo "PR #$PR_NUM did not merge within 5 minutes, skipping AUR push"
+            exit 0
+          fi
+          
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
+          
+          cat >> ~/.ssh/config << 'SSHEOF'
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            User aur
+            IdentitiesOnly yes
+          SSHEOF
+          
+          # Pull latest main (post-merge)
+          git fetch origin main
+          git checkout origin/main -- "aur/$PKG_NAME/"
+          
+          cd "aur/$PKG_NAME"
+          
+          if [[ ! -f .aur-files ]]; then
+            echo "ERROR: .aur-files not found"
+            exit 1
+          fi
+          
+          git clone "ssh://aur@aur.archlinux.org/$PKG_NAME.git" /tmp/aur-push 2>/dev/null || {
+            echo "New AUR package, initializing..."
+            mkdir -p /tmp/aur-push
+            cd /tmp/aur-push
+            git init --initial-branch=master
+            git remote add origin "ssh://aur@aur.archlinux.org/$PKG_NAME.git"
+            cd -
+          }
+          
+          while IFS= read -r file || [[ -n "$file" ]]; do
+            [[ -z "$file" || "$file" == \#* ]] && continue
+            if [[ ! -e "$file" ]]; then
+              echo "ERROR: File '$file' listed in .aur-files does not exist"
+              exit 1
+            fi
+            cp -r "$file" /tmp/aur-push/
+            echo "Copied: $file"
+          done < .aur-files
+          
+          cd /tmp/aur-push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          
+          if ! git diff --staged --quiet; then
+            git commit -m "$PKG_NAME: update to ${{ matrix.update.new_version }}"
+            git push origin master
+            echo "Successfully pushed $PKG_NAME to AUR"
+          else
+            echo "No changes to push for $PKG_NAME"
+          fi
+
       - name: Create issue on failure
         if: failure() || cancelled()
         env:

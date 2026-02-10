@@ -6,12 +6,6 @@ on:
     paths:
       - 'aur/**/PKGBUILD'
       - 'aur/**/.SRCINFO'
-  pull_request:
-    types: [closed]
-    branches: [main]
-    paths:
-      - 'aur/**/PKGBUILD'
-      - 'aur/**/.SRCINFO'
   workflow_dispatch:
     inputs:
       packages:
@@ -22,8 +16,6 @@ on:
 jobs:
   push-to-aur:
     runs-on: ubuntu-latest
-    # Only run on merged PRs (not closed without merge) or direct pushes/dispatch
-    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
     
     steps:
       - uses: actions/checkout@v4
