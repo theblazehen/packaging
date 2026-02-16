@@ -65,8 +65,8 @@
       "revision": "c8d1bfe8e800082c257274f40f0f799835e155e1"
     },
     "aur/openchamber": {
-      "version": "1.6.6",
-      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.6.6"
+      "version": "1.6.8",
+      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.6.8"
     },
     "aur/ovrport-bin": {
       "version": "1.2.2",
