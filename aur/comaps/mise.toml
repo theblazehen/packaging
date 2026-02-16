@@ -27,7 +27,7 @@ if [[ "${CI:-}" == "true" ]]; then
   exit 0
 fi
 cd "$WORKSPACE"
-makepkg -sf
+makepkg -sf --noconfirm
 '''
 
 [tasks.build-local]
@@ -35,7 +35,7 @@ description = "Actually build the package (local only)"
 run = '''
 #!/usr/bin/env bash
 cd "$WORKSPACE"
-makepkg -sf
+makepkg -sf --noconfirm
 '''
 
 [tasks.test]

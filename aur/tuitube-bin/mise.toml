@@ -22,7 +22,7 @@ description = "Build AUR package"
 run = '''
 #!/usr/bin/env bash
 cd "$WORKSPACE"
-makepkg -sf
+makepkg -sf --noconfirm
 '''
 
 [tasks.test]
