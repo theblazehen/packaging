@@ -4,7 +4,7 @@ _npmname=@openchamber/web
 pkgver=1.7.0
 pkgrel=1
 pkgdesc="Desktop and web interface for OpenCode AI agent"
-arch=('any')
+arch=('x86_64')
 url="https://github.com/btriapitsyn/openchamber"
 license=('MIT')
 depends=('nodejs')
@@ -21,6 +21,15 @@ package() {
     chown -R root:root "${pkgdir}"
 
     find "$pkgdir" -name package.json -print0 | xargs -r -0 sed -i '/_where/d'
+
+    # remove prebuilt artifacts for non-x86_64 architectures
+    find "${pkgdir}/usr" -type f \( -name '*arm64*' -o -name '*aarch64*' \) -delete
+
+    # install license file if present
+    if [ -f "$pkgdir/usr/lib/node_modules/@openchamber/web/LICENSE" ]; then
+        mkdir -p "$pkgdir/usr/share/licenses/$pkgname"
+        cp "$pkgdir/usr/lib/node_modules/@openchamber/web/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/"
+    fi
 
     local tmppackage="$(mktemp)"
     local pkgjson="$pkgdir/usr/lib/node_modules/@openchamber/web/package.json"
