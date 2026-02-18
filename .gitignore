@@ -20,6 +20,9 @@ npm-cache/
 aur/*/.git/
 repomix-output.xml
 
+# OpenCode runtime state
+.opencode/
+
 # jj workspaces (cached, regenerated from patches)
 .cache/
 .actrc

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: 'Specific package to update (e.g., docker/clawd.bot, aur/promptfoo)'
+        description: 'Specific package to update (e.g., aur/promptfoo)'
         required: false
 
 permissions:
@@ -26,55 +26,55 @@ jobs:
     outputs:
       packages: ${{ steps.detect.outputs.packages }}
       has_updates: ${{ steps.detect.outputs.has_updates }}
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install nvchecker
         run: pip install nvchecker
-      
+
       - name: Run nvchecker
         run: nvchecker -c nvchecker.toml
-      
+
       - name: Detect updates
         id: detect
         run: |
           python3 << 'PYEOF'
           import json
           import os
-          
+
           old_path = '.github/nvchecker/old_ver.json'
           new_path = '.github/nvchecker/new_ver.json'
-          
+
           old_data = {}
           if os.path.exists(old_path):
               with open(old_path) as f:
                   old_raw = json.load(f)
                   old_data = old_raw.get('data', old_raw)
-          
+
           with open(new_path) as f:
               new_raw = json.load(f)
               new_data = new_raw.get('data', new_raw)
-          
+
           updates = []
           for pkg, new_info in new_data.items():
               new_ver = new_info['version'] if isinstance(new_info, dict) else new_info
-              
+
               old_info = old_data.get(pkg, {})
               old_ver = old_info.get('version') if isinstance(old_info, dict) else old_info
-              
+
               if old_ver != new_ver:
                   updates.append({
                       "package": pkg,
                       "old_version": old_ver or "unknown",
                       "new_version": new_ver,
                   })
-          
+
           manual_pkg = os.environ.get('MANUAL_PACKAGE', '')
           if manual_pkg:
               updates = [u for u in updates if u['package'] == manual_pkg]
@@ -86,42 +86,39 @@ jobs:
                       "old_version": "forced",
                       "new_version": new_ver,
                   }]
-          
+
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write(f"packages={json.dumps(updates)}\n")
               f.write(f"has_updates={'true' if updates else 'false'}\n")
-          
+
           print(f"Found {len(updates)} updates: {[u['package'] for u in updates]}")
           PYEOF
         env:
           MANUAL_PACKAGE: ${{ inputs.package }}
-      
+
       - name: Upload nvchecker state
         uses: actions/upload-artifact@v4
         if: ${{ !env.ACT }}
         with:
           name: nvchecker-state
           path: .github/nvchecker/new_ver.json
-      
+
       - name: Export new version info per package
-        id: export-versions
         run: |
-          # Extract per-package version info for use in update-package job
           python3 << 'PYEOF'
           import json
           import os
-          
+
           with open('.github/nvchecker/new_ver.json') as f:
               data = json.load(f)
-          
-          # Write individual version files for each package
+
           os.makedirs('/tmp/pkg-versions', exist_ok=True)
           for pkg, info in data.get('data', data).items():
               safe_name = pkg.replace('/', '_')
               with open(f'/tmp/pkg-versions/{safe_name}.json', 'w') as f:
                   json.dump({pkg: info}, f)
           PYEOF
-      
+
       - name: Upload per-package versions
         uses: actions/upload-artifact@v4
         if: ${{ !env.ACT }}
@@ -145,16 +142,16 @@ jobs:
         update: ${{ fromJson(needs.detect-updates.outputs.packages) }}
       fail-fast: false
       max-parallel: 1
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup git
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      
+
       - name: Restore workspace cache
         uses: actions/cache@v4
         with:
@@ -162,50 +159,35 @@ jobs:
           key: workspace-${{ matrix.update.package }}-${{ github.sha }}
           restore-keys: |
             workspace-${{ matrix.update.package }}-
-      
-      - name: Setup workspace
-        run: mise -C ${{ matrix.update.package }} r setup
-      
+
       - name: Download package version info
         uses: actions/download-artifact@v4
         with:
           name: pkg-versions
           path: /tmp/pkg-versions/
-      
+
+      - name: Sync with remote main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Fetch changelog
-        id: changelog
-        run: |
-          PKG_TYPE=$(echo "${{ matrix.update.package }}" | cut -d/ -f1)
-          PKG_DIR="${{ matrix.update.package }}"
-          
-          if [[ "$PKG_TYPE" == "docker" ]]; then
-            WORKSPACE=".cache/${{ matrix.update.package }}"
-            OLD_REF=$(cat "$PKG_DIR/.upstream-ref" 2>/dev/null || echo "")
-            
-            if [[ -n "$OLD_REF" ]] && [[ -d "$WORKSPACE" ]]; then
-              cd "$WORKSPACE"
-              jj git fetch upstream 2>/dev/null || true
-              jj log -r "($OLD_REF)..main@upstream" --no-graph \
-                -T 'commit_id.short() ++ " " ++ description.first_line() ++ "\n"' \
-                > /tmp/changelog.txt 2>/dev/null || echo "Unable to fetch changelog" > /tmp/changelog.txt
-              cd -
-            else
-              echo "No previous ref or workspace" > /tmp/changelog.txt
-            fi
-          else
-            echo "AUR package - check upstream release notes" > /tmp/changelog.txt
-          fi
-      
-      - name: Try sync
-        id: sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PKG_DIR: ${{ matrix.update.package }}
+          NEW_VERSION: ${{ matrix.update.new_version }}
+          OLD_VERSION: ${{ matrix.update.old_version }}
+        run: bash .github/scripts/fetch-changelog.sh
+
+      - name: Try update (build)
+        id: build
         continue-on-error: true
-        run: |
-          mise -C ${{ matrix.update.package }} r sync 2>&1 | tee /tmp/sync-output.txt
-          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
-      
-      - name: Gather all context
-        run: mise -C ${{ matrix.update.package }} r gather-context > /tmp/full-context.txt
-      
+        env:
+          PKG_DIR: ${{ matrix.update.package }}
+          NEW_VERSION: ${{ matrix.update.new_version }}
+          OLD_VERSION: ${{ matrix.update.old_version }}
+        run: bash .github/scripts/try-update.sh
+
       - name: Setup OpenCode config
         env:
           LLM_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
@@ -233,96 +215,241 @@ jobs:
             }
           }
           EOF
-      
-      - name: Invoke OpenCode
+
+      - name: LLM review (build succeeded)
+        id: review
+        if: steps.build.outcome == 'success'
         env:
           LLM_PROXY_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
           GH_TOKEN: ${{ github.token }}
-          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          PKG_DIR: ${{ matrix.update.package }}
+          NEW_VERSION: ${{ matrix.update.new_version }}
+          OLD_VERSION: ${{ matrix.update.old_version }}
         run: |
-          SYNC_STATUS="${{ steps.sync.outputs.exit_code == '0' && 'SUCCESS' || 'FAILED' }}"
-          
-          cat > /tmp/prompt.md << PROMPT_EOF
-          # Update: ${{ matrix.update.package }}
-          ## Version: ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
-          
-          ## Previous step results
-          
-          - **Sync**: ${SYNC_STATUS}
-          
-          $(cat /tmp/full-context.txt)
-          
+          # Build the prompt using python to avoid shell quoting/envsubst issues
+          python3 << 'PYEOF'
+          import os
+
+          pkg_dir = os.environ["PKG_DIR"]
+          old_ver = os.environ["OLD_VERSION"]
+          new_ver = os.environ["NEW_VERSION"]
+
+          build_output = ""
+          try:
+              with open("/tmp/build-output.txt") as f:
+                  lines = f.readlines()
+                  build_output = "".join(lines[-200:])
+          except FileNotFoundError:
+              build_output = "(no build output)"
+
+          namcap_output = ""
+          try:
+              with open("/tmp/namcap-output.txt") as f:
+                  namcap_output = f.read()
+          except FileNotFoundError:
+              namcap_output = "(no namcap output)"
+
+          changelog = ""
+          try:
+              with open("/tmp/changelog.txt") as f:
+                  changelog = f.read()
+          except FileNotFoundError:
+              changelog = "(no changelog)"
+
+          prompt = f"""# Review: Package Build Output
+
+          You are reviewing a **successful** package build for an AUR package update.
+          Your job is to review the build output, namcap warnings, and upstream changelog
+          for anything that needs attention BEFORE this goes to a PR.
+
+          ## Package: {pkg_dir}
+          ## Version: {old_ver} → {new_ver}
+
+          ## Build Output (last 200 lines)
+          ```
+          {build_output}
+          ```
+
+          ## namcap Output
+          ```
+          {namcap_output}
+          ```
+
+          ## Upstream Changelog
+          {changelog}
+
           ---
-          
-          ## Goal
-          
-          Update this package to the new version and create a PR.
-          
-          ## Workflow
-          
-          1. Update \`pkgver\` in workspace PKGBUILD to the new version
-          2. Run \`checksums\` to download new source and update sha256sums
-          3. Run \`build\` to verify the package builds (use timeout: 900000)
-          4. Review build output for warnings worth fixing
-          5. Run \`srcinfo\` to regenerate .SRCINFO
-          6. Run \`export\` to copy changes back to package dir
-          7. Commit and create PR with auto-merge enabled (use \`gh pr create\` then \`gh pr merge --auto --squash\`)
-          
-          **DO NOT** rebuild if the build already succeeded unless you made changes that require it.
-          
-          ## Things to check in build output:
-          - Deprecation warnings that could be fixed now
-          - New optional dependencies mentioned upstream
-          - Security advisories requiring PKGBUILD changes
-          - Build warnings indicating future breakage
-          - Missing \`options=('!strip')\` for Node.js packages
-          
-          ## Available mise tasks
-          
-          - \`mise -C ${{ matrix.update.package }} r setup\` - Initialize workspace
-          - \`mise -C ${{ matrix.update.package }} r sync\` - Copy files from package dir to workspace
-          - \`mise -C ${{ matrix.update.package }} r build\` - Build package
-          - \`mise -C ${{ matrix.update.package }} r test\` - Test package  
-          - \`mise -C ${{ matrix.update.package }} r export\` - Copy workspace files back to package dir
-          - \`mise -C ${{ matrix.update.package }} r checksums\` - Update checksums in PKGBUILD
-          - \`mise -C ${{ matrix.update.package }} r srcinfo\` - Generate .SRCINFO
-          
-          ## Workspace
-          
-          All edits and builds operate on: \`.cache/${{ matrix.update.package }}/\`
-          Use \`export\` to copy changes back to \`${{ matrix.update.package }}/\` before committing.
-          
-          ## Notes
-          
-          - Use \\`timeout: 900000\\` (15 min) for build/test commands.
-          - **IMPORTANT**: After committing package changes, also update \\`.github/nvchecker/old_ver.json\\` with the new version for this package. The version info file is at \\`/tmp/pkg-versions/\\` with the package name having \\`/\\` replaced by \\`_\\` (e.g., \\`aur_promptfoo.json\\` for \\`aur/promptfoo\\`). Merge this into \\`old_ver.json\\`. Include this in the same PR commit.
-          
-          PROMPT_EOF
-          
-          opencode run "$(cat /tmp/prompt.md)"
-      
+
+          ## Instructions
+
+          Review the above and check for:
+          1. **Build warnings** that indicate real problems (not just noise)
+          2. **namcap warnings** that should be fixed (missing deps, bad permissions, etc.)
+          3. **Upstream changelog** mentions of breaking changes, new dependencies, or deprecations
+          4. **Security advisories** in the changelog
+
+          If everything looks clean, respond with ONLY:
+          ```
+          LGTM: <one-line summary>
+          ```
+
+          If there are issues worth fixing:
+          1. Edit the PKGBUILD in the workspace (at `.cache/{pkg_dir}/PKGBUILD`)
+          2. Re-run the build: `mise -C {pkg_dir} r build` (use timeout: 900000)
+          3. Re-run: `mise -C {pkg_dir} r srcinfo`
+          4. Re-run: `mise -C {pkg_dir} r export`
+          5. Then respond with:
+          ```
+          FIXED: <what you changed and why>
+          ```
+
+          Do NOT handle git, branches, PRs, or commits. That is done by a separate script.
+          """
+
+          with open("/tmp/prompt-final.md", "w") as f:
+              f.write(prompt)
+          PYEOF
+
+          REVIEW=$(opencode run "$(cat /tmp/prompt-final.md)" 2>&1 | tail -20)
+          echo "LLM Review: $REVIEW"
+          echo "$REVIEW" > /tmp/llm-review.txt
+
+      - name: LLM diagnose (build failed)
+        id: diagnose
+        if: steps.build.outcome == 'failure'
+        env:
+          LLM_PROXY_API_KEY: ${{ secrets.LLM_PROXY_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          PKG_DIR: ${{ matrix.update.package }}
+          NEW_VERSION: ${{ matrix.update.new_version }}
+          OLD_VERSION: ${{ matrix.update.old_version }}
+        run: |
+          python3 << 'PYEOF'
+          import os
+
+          pkg_dir = os.environ["PKG_DIR"]
+          old_ver = os.environ["OLD_VERSION"]
+          new_ver = os.environ["NEW_VERSION"]
+
+          build_output = ""
+          try:
+              with open("/tmp/build-output.txt") as f:
+                  build_output = f.read()
+          except FileNotFoundError:
+              build_output = "(no build output)"
+
+          changelog = ""
+          try:
+              with open("/tmp/changelog.txt") as f:
+                  changelog = f.read()
+          except FileNotFoundError:
+              changelog = "(no changelog)"
+
+          pkgbuild = ""
+          try:
+              with open(f"{pkg_dir}/PKGBUILD") as f:
+                  pkgbuild = f.read()
+          except FileNotFoundError:
+              pkgbuild = "(PKGBUILD not found)"
+
+          agents_md = ""
+          try:
+              with open(f"{pkg_dir}/AGENTS.md") as f:
+                  agents_md = f.read()
+          except FileNotFoundError:
+              agents_md = "(none)"
+
+          prompt = f"""# Fix: Package Build Failure
+
+          The automated build for this AUR package update FAILED.
+          Your job is to diagnose the failure, fix the PKGBUILD, and get it building.
+
+          ## Package: {pkg_dir}
+          ## Version: {old_ver} → {new_ver}
+
+          ## Build Output
+          ```
+          {build_output}
+          ```
+
+          ## Upstream Changelog
+          {changelog}
+
+          ## Current PKGBUILD
+          ```
+          {pkgbuild}
+          ```
+
+          ## AGENTS.md
+          {agents_md}
+
+          ---
+
+          ## Instructions
+
+          1. Diagnose why the build failed
+          2. Fix the PKGBUILD at `.cache/{pkg_dir}/PKGBUILD`
+          3. Run `mise -C {pkg_dir} r checksums` if you changed source URLs
+          4. Rebuild: `mise -C {pkg_dir} r build` (use timeout: 900000)
+          5. Run `mise -C {pkg_dir} r srcinfo`
+          6. Run `mise -C {pkg_dir} r export`
+          7. Respond with:
+          ```
+          FIXED: <what was wrong and what you changed>
+          ```
+
+          If the failure is unfixable (e.g. upstream is genuinely broken), respond with:
+          ```
+          UNFIXABLE: <explanation>
+          ```
+
+          Do NOT handle git, branches, PRs, or commits. That is done by a separate script.
+          """
+
+          with open("/tmp/prompt-final.md", "w") as f:
+              f.write(prompt)
+          PYEOF
+
+          RESULT=$(opencode run "$(cat /tmp/prompt-final.md)" 2>&1 | tail -20)
+          echo "LLM Result: $RESULT"
+          echo "$RESULT" > /tmp/llm-review.txt
+
+          if echo "$RESULT" | grep -q "UNFIXABLE"; then
+            echo "Build is unfixable, failing job"
+            exit 1
+          fi
+
+      - name: Create PR
+        if: steps.build.outcome == 'success' || steps.diagnose.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PKG_DIR: ${{ matrix.update.package }}
+          NEW_VERSION: ${{ matrix.update.new_version }}
+          OLD_VERSION: ${{ matrix.update.old_version }}
+        run: |
+          export LLM_REVIEW=""
+          if [[ -f /tmp/llm-review.txt ]]; then
+            export LLM_REVIEW=$(cat /tmp/llm-review.txt)
+          fi
+          bash .github/scripts/create-pr.sh
+
       - name: Push to AUR
-        if: success()
+        if: steps.build.outcome == 'success' || steps.diagnose.outcome == 'success'
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # Wait for auto-merge to complete (gh pr merge --auto is async)
           PKG_NAME=$(echo "${{ matrix.update.package }}" | cut -d/ -f2)
-          
-          # Find the PR we just created
-          PR_NUM=$(gh pr list --head "${{ matrix.update.package }}/${{ matrix.update.new_version }}" --json number --jq '.[0].number // empty' 2>/dev/null || true)
-          if [[ -z "$PR_NUM" ]]; then
-            PR_NUM=$(gh pr list --state merged --search "$PKG_NAME ${{ matrix.update.new_version }}" --json number --jq '.[0].number // empty' 2>/dev/null || true)
-          fi
-          
-          if [[ -z "$PR_NUM" ]]; then
-            echo "No PR found, skipping AUR push"
+
+          if [[ ! -f /tmp/pr-url.txt ]]; then
+            echo "No PR was created, skipping AUR push"
             exit 0
           fi
-          
-          echo "Found PR #$PR_NUM, waiting for merge..."
-          
-          # Poll for merge (auto-merge is async, may take a moment)
+
+          PR_URL=$(cat /tmp/pr-url.txt)
+          PR_NUM=$(echo "$PR_URL" | grep -oP '\d+$')
+
+          echo "Waiting for PR #$PR_NUM to merge..."
           for i in $(seq 1 30); do
             STATE=$(gh pr view "$PR_NUM" --json state --jq '.state')
             if [[ "$STATE" == "MERGED" ]]; then
@@ -335,29 +462,26 @@ jobs:
             echo "PR state: $STATE, waiting... ($i/30)"
             sleep 10
           done
-          
+
           if [[ "$STATE" != "MERGED" ]]; then
             echo "PR #$PR_NUM did not merge within 5 minutes, skipping AUR push"
             exit 0
           fi
-          
-          # Write SSH key to absolute path that the container's SSH config expects
-          # (~ resolves to /github/home in GHA container jobs, but SSH config has /home/builder)
+
           mkdir -p /home/builder/.ssh
           echo "$AUR_SSH_PRIVATE_KEY" > /home/builder/.ssh/aur_key
           chmod 600 /home/builder/.ssh/aur_key
-          
-          # Pull latest main (post-merge)
+
           git fetch origin main
           git checkout origin/main -- "aur/$PKG_NAME/"
-          
+
           cd "aur/$PKG_NAME"
-          
+
           if [[ ! -f .aur-files ]]; then
             echo "ERROR: .aur-files not found"
             exit 1
           fi
-          
+
           git clone "ssh://aur@aur.archlinux.org/$PKG_NAME.git" /tmp/aur-push 2>/dev/null || {
             echo "New AUR package, initializing..."
             mkdir -p /tmp/aur-push
@@ -366,7 +490,7 @@ jobs:
             git remote add origin "ssh://aur@aur.archlinux.org/$PKG_NAME.git"
             cd -
           }
-          
+
           while IFS= read -r file || [[ -n "$file" ]]; do
             [[ -z "$file" || "$file" == \#* ]] && continue
             if [[ ! -e "$file" ]]; then
@@ -376,12 +500,12 @@ jobs:
             cp -r "$file" /tmp/aur-push/
             echo "Copied: $file"
           done < .aur-files
-          
+
           cd /tmp/aur-push
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          
+
           if ! git diff --staged --quiet; then
             git commit -m "$PKG_NAME: update to ${{ matrix.update.new_version }}"
             git push origin master
@@ -396,36 +520,49 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TITLE="${{ matrix.update.package }}: update to ${{ matrix.update.new_version }} failed"
-          
-          # Check if issue already exists
+
           EXISTING=$(gh issue list --search "in:title \"$TITLE\"" --state open --json number --jq '.[0].number // empty')
           if [[ -n "$EXISTING" ]]; then
             echo "Issue #$EXISTING already exists, skipping"
             exit 0
           fi
-          
-          # Determine failure reason
+
           if [[ "${{ job.status }}" == "cancelled" ]]; then
             REASON="Job was cancelled (likely due to timeout)"
           else
             REASON="Job failed during execution"
           fi
-          
-          cat > /tmp/issue-body.md << 'ISSUE_EOF'
-          ## Update Failed
-          
-          **Package**: `${{ matrix.update.package }}`
-          **Version**: ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}
-          **Reason**: REASON_PLACEHOLDER
-          
-          ### Workflow Run
-          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          
-          ### Next Steps
-          1. Check the workflow logs for details
-          2. Fix the issue manually or wait for upstream fix
-          3. Close this issue when resolved
-          ISSUE_EOF
-          
-          sed -i "s/REASON_PLACEHOLDER/$REASON/" /tmp/issue-body.md
+
+          # Build issue body as a file to avoid quoting issues
+          {
+            echo "## Update Failed"
+            echo ""
+            echo "**Package**: \`${{ matrix.update.package }}\`"
+            echo "**Version**: ${{ matrix.update.old_version }} → ${{ matrix.update.new_version }}"
+            echo "**Reason**: $REASON"
+            echo ""
+            echo "### Workflow Run"
+            echo "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+            if [[ -f /tmp/llm-review.txt ]]; then
+              echo ""
+              echo "### LLM Output"
+              cat /tmp/llm-review.txt
+            fi
+
+            if [[ -f /tmp/build-output.txt ]]; then
+              echo ""
+              echo "### Build Output (last 50 lines)"
+              echo '```'
+              tail -50 /tmp/build-output.txt
+              echo '```'
+            fi
+
+            echo ""
+            echo "### Next Steps"
+            echo "1. Check the workflow logs for details"
+            echo "2. Fix the issue manually or wait for upstream fix"
+            echo "3. Close this issue when resolved"
+          } > /tmp/issue-body.md
+
           gh issue create --title "$TITLE" --body-file /tmp/issue-body.md

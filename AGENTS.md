@@ -51,16 +51,22 @@ This workspace manages packaging for various distribution channels.
 
 ## Automation (GitHub Actions + OpenCode)
 
-Daily automated workflow:
+Daily automated workflow (script-first, LLM only when needed):
+
 1. **nvchecker** detects upstream version changes
-2. **OpenCode** (claude-opus-4-5) prepares updates in Arch container:
-   - Updates PKGBUILD
-   - Runs `updpkgsums`
-   - Builds with `makepkg -sf` and observes output
-   - Smoke tests the install
-   - Generates `.SRCINFO`
-3. Creates **PR with changelog** for human review (or Issue if build fails)
+2. **Scripts** handle the happy path mechanically:
+   - `fetch-changelog.sh` fetches real upstream changelog (GitHub releases, commit log)
+   - `try-update.sh` bumps version, updates checksums, builds, runs namcap
+   - `create-pr.sh` creates branch, commits, pushes, opens PR with auto-merge
+3. **LLM** is invoked in two scenarios:
+   - **Build succeeded**: Reviews build output + namcap + changelog for issues worth fixing
+   - **Build failed**: Diagnoses failure, fixes PKGBUILD, rebuilds
 4. On PR merge, **auto-pushes to AUR**
+
+### Scripts (`.github/scripts/`)
+- `try-update.sh` - Mechanical version bump + checksums + build + namcap + srcinfo + export
+- `fetch-changelog.sh` - Fetches upstream changelog (GitHub releases, git compare, npm)
+- `create-pr.sh` - Creates feature branch, commits, pushes, opens PR with auto-merge
 
 ### Secrets Required
 - `LLM_PROXY_API_KEY`: OpenCode LLM access
@@ -122,20 +128,19 @@ Some packages have additional files:
 
 The main workflow that:
 1. Runs nvchecker to detect version changes
-2. Spawns OpenCode in an Arch container to update packages
-3. Creates PRs for successful updates or Issues for failures
+2. Fetches upstream changelog via `fetch-changelog.sh`
+3. Attempts mechanical update via `try-update.sh` (version bump + build)
+4. On build success: LLM reviews output for issues worth fixing
+5. On build failure: LLM diagnoses and attempts fix
+6. Creates PR via `create-pr.sh` with changelog + review in body
+7. Waits for auto-merge, then pushes to AUR
 
 **Key features:**
 - Runs as UID 1001 (`builder` user) for makepkg compatibility
 - Per-package workspace caching
-- 15-minute timeout for builds (`timeout: 900000`)
-- Single build after version update (no redundant rebuilds)
-
-### aur-push.yml
-
-Triggered on PR merge to main:
-1. Reads `.aur-files` manifest for each changed package
-2. Pushes listed files to the AUR git remote
+- 30-minute timeout per package
+- Script-first: LLM only invoked for review/failures (saves cost + avoids LLM flakiness)
+- Sequential execution (`max-parallel: 1`) with `git fetch origin main` between jobs
 
 ## Container Image
 
