@@ -252,7 +252,7 @@ jobs:
           changelog = ""
           try:
               with open("/tmp/changelog.txt") as f:
-                  changelog = f.read()
+                  changelog = f.read()[:5000]
           except FileNotFoundError:
               changelog = "(no changelog)"
 
@@ -310,7 +310,7 @@ jobs:
               f.write(prompt)
           PYEOF
 
-          REVIEW=$(opencode run "$(cat /tmp/prompt-final.md)" 2>&1 | tail -20)
+          REVIEW=$(opencode run "@/tmp/prompt-final.md" 2>&1 | tail -20)
           echo "LLM Review: $REVIEW"
           echo "$REVIEW" > /tmp/llm-review.txt
 
@@ -334,14 +334,15 @@ jobs:
           build_output = ""
           try:
               with open("/tmp/build-output.txt") as f:
-                  build_output = f.read()
+                  lines = f.readlines()
+                  build_output = "".join(lines[-500:])
           except FileNotFoundError:
               build_output = "(no build output)"
 
           changelog = ""
           try:
               with open("/tmp/changelog.txt") as f:
-                  changelog = f.read()
+                  changelog = f.read()[:5000]
           except FileNotFoundError:
               changelog = "(no changelog)"
 
@@ -367,7 +368,7 @@ jobs:
           ## Package: {pkg_dir}
           ## Version: {old_ver} → {new_ver}
 
-          ## Build Output
+          ## Build Output (last 500 lines)
           ```
           {build_output}
           ```
@@ -410,7 +411,7 @@ jobs:
               f.write(prompt)
           PYEOF
 
-          RESULT=$(opencode run "$(cat /tmp/prompt-final.md)" 2>&1 | tail -20)
+          RESULT=$(opencode run "@/tmp/prompt-final.md" 2>&1 | tail -20)
           echo "LLM Result: $RESULT"
           echo "$RESULT" > /tmp/llm-review.txt
 

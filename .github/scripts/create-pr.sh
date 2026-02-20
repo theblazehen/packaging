@@ -79,7 +79,11 @@ git push -u origin "$BRANCH" --force
 
 	if [[ -f /tmp/changelog.txt ]]; then
 		echo ""
-		cat /tmp/changelog.txt
+		head -c 20000 /tmp/changelog.txt
+		if [[ $(wc -c </tmp/changelog.txt) -gt 20000 ]]; then
+			echo ""
+			echo "*...changelog truncated...*"
+		fi
 	fi
 
 	if [[ -n "${LLM_REVIEW:-}" ]]; then
@@ -95,7 +99,18 @@ git push -u origin "$BRANCH" --force
 		cat /tmp/namcap-output.txt
 		echo '```'
 	fi
-} >/tmp/pr-body.md
+} >/tmp/pr-body-raw.md
+
+# Truncate PR body to stay under GitHub's 65536 char limit
+MAX_BODY=60000
+if [[ $(wc -c </tmp/pr-body-raw.md) -gt $MAX_BODY ]]; then
+	head -c $MAX_BODY /tmp/pr-body-raw.md >/tmp/pr-body.md
+	echo "" >>/tmp/pr-body.md
+	echo "---" >>/tmp/pr-body.md
+	echo "*PR body truncated (exceeded GitHub's 65536 char limit)*" >>/tmp/pr-body.md
+else
+	cp /tmp/pr-body-raw.md /tmp/pr-body.md
+fi
 
 # Step 7: Create PR with auto-merge
 echo "--- Creating PR ---"
