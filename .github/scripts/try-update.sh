@@ -45,6 +45,38 @@ if ! is_git_package; then
 	mise -C "$PKG_DIR" r checksums 2>&1
 fi
 
+# Step 4.5: Install AUR dependencies (makepkg -s only handles repo deps)
+echo "--- Installing AUR dependencies ---"
+install_aur_deps() {
+	local pkgbuild="$1"
+	local all_deps=()
+
+	while IFS= read -r dep; do
+		dep="${dep%%[>=<]*}"
+		[[ -z "$dep" ]] && continue
+		if ! pacman -Si "$dep" &>/dev/null && ! pacman -Qi "$dep" &>/dev/null; then
+			all_deps+=("$dep")
+		fi
+	done < <(
+		bash -c "source '$pkgbuild' && printf '%s\n' \"\${depends[@]}\" \"\${makedepends[@]}\" \"\${checkdepends[@]}\"" 2>/dev/null
+	)
+
+	if [[ ${#all_deps[@]} -gt 0 ]]; then
+		echo "AUR deps to install: ${all_deps[*]}"
+		if command -v yay &>/dev/null; then
+			yay -S --noconfirm --needed "${all_deps[@]}" 2>&1
+		elif command -v paru &>/dev/null; then
+			paru -S --noconfirm --needed "${all_deps[@]}" 2>&1
+		else
+			echo "WARNING: No AUR helper found, cannot install: ${all_deps[*]}"
+			echo "Install yay or paru to resolve AUR dependencies"
+		fi
+	else
+		echo "No AUR-only dependencies found"
+	fi
+}
+install_aur_deps "$WORKSPACE/PKGBUILD"
+
 # Step 5: Build
 echo "--- Building package ---"
 BUILD_EXIT=0

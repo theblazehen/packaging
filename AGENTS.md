@@ -80,6 +80,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - `updpkgsums`: Update checksums in PKGBUILD
 - `namcap`: Package quality control (install if missing)
 - `nvchecker`: Upstream version detection
+- `yay`: AUR helper (installed in builder container, used by `try-update.sh` to install AUR-only deps)
 
 ## Global Policies
 - **License**: Ensure proper SPDX identifiers
@@ -87,7 +88,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 
-## Current Packages (16 total)
+## Current Packages (17 total)
 
 | Package | Type | Source |
 |---------|------|--------|
@@ -97,6 +98,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 | code-notify | GitHub | `mylee04/code-notify` |
 | yacy | GitHub | `yacy/yacy_search_server` |
 | ccstatusline | npm | `ccstatusline` |
+| python-smooth | PyPI | `smooth-py` |
 | openchamber | GitHub | `nicobrenner/openchamber` |
 | bdui-bin | GitHub | `AnubhabB/retaurant-llm` |
 | xmenu | GitHub | `phillbush/xmenu` |

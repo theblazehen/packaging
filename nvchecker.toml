@@ -36,6 +36,14 @@ npm = "@openchamber/web"
 source = "npm"
 npm = "ccstatusline"
 
+# ═══════════════════════════════════════════════════════════════════
+# AUR: PyPI Packages
+# ═══════════════════════════════════════════════════════════════════
+
+["aur/python-smooth"]
+source = "pypi"
+pypi = "smooth-py"
+
 ["aur/claude-code-ui"]
 source = "npm"
 npm = "@siteboon/claude-code-ui"
