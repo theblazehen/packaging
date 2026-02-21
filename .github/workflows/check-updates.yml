@@ -310,7 +310,7 @@ jobs:
               f.write(prompt)
           PYEOF
 
-          REVIEW=$(opencode run "@/tmp/prompt-final.md" 2>&1 | tail -20)
+          REVIEW=$(timeout 300 opencode run "@/tmp/prompt-final.md" 2>&1 | tail -20) || true
           echo "LLM Review: $REVIEW"
           echo "$REVIEW" > /tmp/llm-review.txt
 
@@ -411,7 +411,7 @@ jobs:
               f.write(prompt)
           PYEOF
 
-          RESULT=$(opencode run "@/tmp/prompt-final.md" 2>&1 | tail -20)
+          RESULT=$(timeout 600 opencode run "@/tmp/prompt-final.md" 2>&1 | tail -20)
           echo "LLM Result: $RESULT"
           echo "$RESULT" > /tmp/llm-review.txt
 
