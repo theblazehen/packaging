@@ -112,18 +112,26 @@ else
 	cp /tmp/pr-body-raw.md /tmp/pr-body.md
 fi
 
-# Step 7: Create PR with auto-merge
-echo "--- Creating PR ---"
-PR_URL=$(gh pr create \
-	--title "$COMMIT_MSG" \
-	--body-file /tmp/pr-body.md \
-	--base main \
-	--head "$BRANCH")
-
-echo "Created: $PR_URL"
+# Step 7: Create or update PR with auto-merge
+echo "--- Checking for existing PR ---"
+if PR_URL=$(gh pr view "$BRANCH" --json url --jq .url 2>/dev/null); then
+	echo "Found existing PR: $PR_URL"
+	echo "--- Updating PR ---"
+	gh pr edit "$PR_URL" \
+		--title "$COMMIT_MSG" \
+		--body-file /tmp/pr-body.md
+else
+	echo "--- Creating PR ---"
+	PR_URL=$(gh pr create \
+		--title "$COMMIT_MSG" \
+		--body-file /tmp/pr-body.md \
+		--base main \
+		--head "$BRANCH")
+	echo "Created: $PR_URL"
+fi
 
 echo "--- Enabling auto-merge ---"
 gh pr merge --auto --squash "$PR_URL" || echo "Warning: auto-merge may not be enabled on this repo"
 
-echo "=== PR created: $PR_URL ==="
+echo "=== PR ready: $PR_URL ==="
 echo "$PR_URL" >/tmp/pr-url.txt
