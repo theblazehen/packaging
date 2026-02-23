@@ -46,6 +46,7 @@ jobs:
               | grep '^aur/' \
               | cut -d/ -f2 \
               | sort -u \
+              | while read pkg; do [ -d "aur/$pkg" ] && echo "$pkg"; done \
               | tr '\n' ' ')
           fi
           echo "packages=$packages" >> $GITHUB_OUTPUT
