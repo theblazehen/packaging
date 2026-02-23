@@ -93,11 +93,6 @@ github = "russellbanks/Komac"
 use_latest_release = true
 prefix = "v"
 
-["aur/comaps"]
-source = "regex"
-url = "https://codeberg.org/comaps/comaps/releases"
-regex = "v(\\d{4}\\.\\d+\\.\\d+-\\d+)"
-
 ["aur/slackdump-bin"]
 source = "github"
 github = "rusq/slackdump"

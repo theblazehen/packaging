@@ -88,27 +88,36 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 
-## Current Packages (17 total)
+## Current Packages (26 total)
 
 | Package | Type | Source |
 |---------|------|--------|
 | promptfoo | npm | `promptfoo` |
 | kimaki | npm | `kimaki` |
-| claude-code-ui | npm | `@anthropic-ai/claude-code` |
-| code-notify | GitHub | `mylee04/code-notify` |
-| yacy | GitHub | `yacy/yacy_search_server` |
 | ccstatusline | npm | `ccstatusline` |
+| claude-code-ui | npm | `@siteboon/claude-code-ui` |
+| openchamber | npm | `@openchamber/web` |
 | python-smooth | PyPI | `smooth-py` |
-| openchamber | GitHub | `nicobrenner/openchamber` |
-| bdui-bin | GitHub | `AnubhabB/retaurant-llm` |
-| xmenu | GitHub | `phillbush/xmenu` |
+| adb-gui-kit-bin | GitHub | `Drenzzz/adb-gui-kit` |
 | arweave-deploy-bin | GitHub | `ArweaveTeam/arweave-deploy` |
+| bdui-bin | GitHub | `assimelha/bdui` |
+| blivet-gui | GitHub | `storaged-project/blivet-gui` |
 | caire | GitHub | `esimov/caire` |
+| code-notify | GitHub | `mylee04/code-notify` |
+| komac | GitHub | `russellbanks/Komac` |
+| ovrport-bin | GitHub | `ovrport/app` |
+| screenpipe-bin | GitHub | `screenpipe/screenpipe` |
+| slackdump-bin | GitHub | `rusq/slackdump` |
+| tuitube-bin | GitHub | `remorses/tuitube` |
+| xmenu | GitHub | `phillbush/xmenu` |
+| yacy | GitHub | `yacy/yacy_search_server` |
 | yt-beats | GitHub | `krishnakanthb13/yt-beats` |
-| blender-mcp-git | git | `ahgsql/blender-mcp` |
-| lazybeads-git | git | `theblazehen/lazybeads` |
-| fractalart-git | git | `theblazehen/FractalArt` |
+| blender-mcp-git | git | `ahujasid/blender-mcp` |
+| fractalart-git | git | `TomSmeets/FractalArt` |
 | jdwp-mcp-git | git | `navicore/jdwp-mcp` |
+| lazybeads-git | git | `codegangsta/lazybeads` |
+| ranger-git | git | `ranger/ranger` |
+| scrapfetch-git | git | `amodi444/scrapfetch` |
 
 ## Package Files
 
