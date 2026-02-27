@@ -7,7 +7,7 @@ arch=('any')
 url="https://github.com/sirmalloc/ccstatusline"
 license=('MIT')
 depends=('nodejs')
-provides=('node')
+
 makedepends=('npm' 'jq')
 source=("https://registry.npmjs.org/${pkgname}/-/${pkgname}-${pkgver}.tgz")
 noextract=("${pkgname}-${pkgver}.tgz")
