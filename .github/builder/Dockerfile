@@ -4,8 +4,10 @@
 FROM archlinux:latest
 
 # Install all packages from Arch repos
+# Includes tools + all depends/makedepends for managed AUR packages
 RUN pacman -Syu --noconfirm && \
     pacman -S --noconfirm \
+        # Build tools
         base-devel \
         git \
         openssh \
@@ -19,6 +21,54 @@ RUN pacman -Syu --noconfirm && \
         sudo \
         mise \
         jujutsu \
+        # Language toolchains (makedepends)
+        go \
+        cargo \
+        python-build \
+        python-installer \
+        python-poetry-core \
+        python-setuptools \
+        cabal-install \
+        ghc \
+        # Python depends
+        python-pip \
+        python-pydantic \
+        python-aiohttp \
+        python-deprecated \
+        python-cairo \
+        python-gobject \
+        python-aiohttp-retry \
+        python-mpv-jsonipc \
+        python-requests \
+        python-textual \
+        # X11/Wayland libs
+        libxcursor \
+        libxfixes \
+        libxkbcommon \
+        wayland \
+        libxkbcommon-x11 \
+        libx11 \
+        libxcb \
+        libglvnd \
+        libxft \
+        libxinerama \
+        imlib2 \
+        # GTK/desktop libs
+        gtk3 \
+        glib2 \
+        cairo \
+        gdk-pixbuf2 \
+        libnotify \
+        adwaita-icon-theme \
+        hicolor-icon-theme \
+        # Runtime deps
+        dbus \
+        openssl \
+        xz \
+        bzip2 \
+        jre-openjdk-headless \
+        android-tools \
+        yt-dlp \
         && \
     pacman -Scc --noconfirm
 
@@ -37,6 +87,13 @@ RUN git clone https://aur.archlinux.org/yay-bin.git && \
     cd yay-bin && \
     makepkg -si --noconfirm && \
     cd .. && rm -rf yay-bin
+
+# Install AUR-only dependencies for managed packages
+RUN yay -S --noconfirm --needed \
+        python-blivet \
+        python-nanoid \
+        python-pid
+
 USER root
 
 # Setup SSH for AUR
