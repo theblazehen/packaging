@@ -97,6 +97,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 | ccstatusline | npm | `ccstatusline` |
 | claude-code-ui | npm | `@siteboon/claude-code-ui` |
 | openchamber | npm | `@openchamber/web` |
+| shopify-cli | npm | `@shopify/cli` |
 | python-smooth | PyPI | `smooth-py` |
 | adb-gui-kit-bin | GitHub | `Drenzzz/adb-gui-kit` |
 | arweave-deploy-bin | GitHub | `ArweaveTeam/arweave-deploy` |

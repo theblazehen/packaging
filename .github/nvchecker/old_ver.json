@@ -115,6 +115,10 @@
     "aur/python-smooth": {
       "version": "0.4.1.post1",
       "url": "https://pypi.org/project/smooth-py/0.4.1.post1/"
+    },
+    "aur/shopify-cli": {
+      "version": "3.91.0",
+      "url": "https://www.npmjs.com/package/@shopify/cli/v/3.91.0"
     }
   }
 }

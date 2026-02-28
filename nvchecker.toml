@@ -36,6 +36,10 @@ npm = "@openchamber/web"
 source = "npm"
 npm = "ccstatusline"
 
+["aur/shopify-cli"]
+source = "npm"
+npm = "@shopify/cli"
+
 # ═══════════════════════════════════════════════════════════════════
 # AUR: PyPI Packages
 # ═══════════════════════════════════════════════════════════════════
