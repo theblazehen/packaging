@@ -94,9 +94,9 @@
       "url": "https://github.com/phillbush/xmenu/releases/tag/v4.6.1"
     },
     "aur/screenpipe-bin": {
-      "version": "0.3.135",
-      "gitref": "refs/tags/v0.3.135",
-      "url": "https://github.com/screenpipe/screenpipe/releases/tag/v0.3.135"
+      "version": "app-v2.2.115",
+      "gitref": "refs/tags/app-v2.2.115",
+      "url": "https://github.com/screenpipe/screenpipe/releases/tag/app-v2.2.115"
     },
     "aur/tuitube-bin": {
       "version": "202601102121",
