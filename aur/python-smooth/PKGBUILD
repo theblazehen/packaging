@@ -1,6 +1,6 @@
 # Maintainer: Jasmin <theblazehen@gmail.com>
 pkgname=python-smooth
-pkgver=0.4.1.post1
+pkgver=0.4.3
 pkgrel=1
 pkgdesc="AI browser automation SDK and CLI - control browsers with natural language"
 arch=('any')
@@ -10,7 +10,7 @@ depends=('python' 'python-pydantic' 'python-aiohttp' 'python-aiohttp-retry' 'pyt
 makedepends=('python-build' 'python-installer' 'python-poetry-core')
 optdepends=('python-fastmcp: MCP server support')
 source=("https://files.pythonhosted.org/packages/source/s/smooth-py/smooth_py-${pkgver}.tar.gz")
-sha256sums=('389ee0e53f50544bfc3aee9fce5906466dfd9ff892f68ac9e03e2c4eca251d2f')
+sha256sums=('faa887debb3138531b8a9828a6b7d904ab50775744c675db368a0f3a4446b42b')
 
 build() {
     cd "smooth-py-${pkgver}"
