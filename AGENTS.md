@@ -88,7 +88,7 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 
-## Current Packages (26 total)
+## Current Packages (25 total)
 
 | Package | Type | Source |
 |---------|------|--------|
@@ -107,7 +107,6 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 | code-notify | GitHub | `mylee04/code-notify` |
 | komac | GitHub | `russellbanks/Komac` |
 | ovrport-bin | GitHub | `ovrport/app` |
-| screenpipe-bin | GitHub | `screenpipe/screenpipe` |
 | slackdump-bin | GitHub | `rusq/slackdump` |
 | tuitube-bin | GitHub | `remorses/tuitube` |
 | xmenu | GitHub | `phillbush/xmenu` |
@@ -169,8 +168,3 @@ Global tasks in `.mise/tasks/`:
 - `export-patches` - Export local changes as patches
 - `gather-context` - Collect context for OpenCode
 - `aur-push` - Push to AUR (reads `.aur-files`)
-
-Per-package tasks in `aur/*/mise.toml`:
-- `build` - Build with makepkg
-- `test` - Install and basic smoke test
-- `lint` - Run namcap checks

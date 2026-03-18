@@ -149,12 +149,6 @@ github = "ovrport/app"
 use_latest_release = true
 prefix = "v"
 
-["aur/screenpipe-bin"]
-source = "github"
-github = "screenpipe/screenpipe"
-use_latest_release = true
-prefix = "v"
-
 ["aur/tuitube-bin"]
 source = "github"
 github = "remorses/tuitube"
