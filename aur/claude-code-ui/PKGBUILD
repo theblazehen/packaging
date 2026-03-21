@@ -1,7 +1,7 @@
 # Maintainer: Jasmin <theblazehen@gmail.com>
 pkgname=claude-code-ui
 _npmname=@siteboon/claude-code-ui
-pkgver=1.25.2
+pkgver=1.26.0
 pkgrel=1
 pkgdesc="Desktop and mobile UI for Claude Code - manage sessions and projects remotely"
 arch=('x86_64')
@@ -12,7 +12,7 @@ makedepends=('npm' 'jq')
 options=('!strip')
 source=("https://registry.npmjs.org/@siteboon/claude-code-ui/-/claude-code-ui-${pkgver}.tgz")
 noextract=("claude-code-ui-${pkgver}.tgz")
-sha256sums=('e643288b76e4bb9bde7d7dabe4ff6962526ffa12e4d37a62843b5c652dca6cf4')
+sha256sums=('7e440cfb15a55e300b2c30048f01b746fdcdc33209401c0bea88bb4f4d92fc0a')
 
 package() {
     npm install -g --cache "${srcdir}/npm-cache" --prefix "${pkgdir}/usr" \
