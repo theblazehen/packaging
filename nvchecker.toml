@@ -24,10 +24,6 @@ newver = ".github/nvchecker/new_ver.json"
 source = "npm"
 npm = "promptfoo"
 
-["aur/kimaki"]
-source = "npm"
-npm = "kimaki"
-
 ["aur/openchamber"]
 source = "npm"
 npm = "@openchamber/web"

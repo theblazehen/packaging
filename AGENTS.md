@@ -88,12 +88,11 @@ Run workflow manually: Actions → "AUR Package Update Check" → Run workflow
 - **Security**: Don't embed secrets
 - **Communication**: Use concise commit messages
 
-## Current Packages (25 total)
+## Current Packages (24 total)
 
 | Package | Type | Source |
 |---------|------|--------|
 | promptfoo | npm | `promptfoo` |
-| kimaki | npm | `kimaki` |
 | ccstatusline | npm | `ccstatusline` |
 | claude-code-ui | npm | `@siteboon/claude-code-ui` |
 | openchamber | npm | `@openchamber/web` |
