@@ -7,9 +7,9 @@ set -euo pipefail
 # Expects: exported files already in $PKG_DIR/ (via try-update.sh or LLM)
 #
 # Required env:
-#   PKG_DIR      - e.g. aur/kimaki
-#   NEW_VERSION  - e.g. 0.4.65
-#   OLD_VERSION  - e.g. 0.4.64
+#   PKG_DIR      - e.g. aur/promptfoo
+#   NEW_VERSION  - e.g. 1.2.3
+#   OLD_VERSION  - e.g. 1.2.2
 #   GH_TOKEN     - GitHub token
 #
 # Optional env:
@@ -130,8 +130,8 @@ else
 	echo "Created: $PR_URL"
 fi
 
-echo "--- Enabling auto-merge ---"
-gh pr merge --auto --squash "$PR_URL" || echo "Warning: auto-merge may not be enabled on this repo"
+echo "--- Merging PR ---"
+gh pr merge --squash "$PR_URL" || echo "Warning: failed to merge PR"
 
 echo "=== PR ready: $PR_URL ==="
 echo "$PR_URL" >/tmp/pr-url.txt

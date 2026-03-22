@@ -57,11 +57,11 @@ Daily automated workflow (script-first, LLM only when needed):
 2. **Scripts** handle the happy path mechanically:
    - `fetch-changelog.sh` fetches real upstream changelog (GitHub releases, commit log)
    - `try-update.sh` bumps version, updates checksums, builds, runs namcap
-   - `create-pr.sh` creates branch, commits, pushes, opens PR with auto-merge
+   - `create-pr.sh` creates branch, commits, pushes, opens PR and merges it
 3. **LLM** is invoked in two scenarios:
    - **Build succeeded**: Reviews build output + namcap + changelog for issues worth fixing
    - **Build failed**: Diagnoses failure, fixes PKGBUILD, rebuilds
-4. On PR merge, **auto-pushes to AUR**
+4. After PR merge, **pushes to AUR**
 
 ### Scripts (`.github/scripts/`)
 - `try-update.sh` - Mechanical version bump + checksums + build + namcap + srcinfo + export

@@ -447,28 +447,6 @@ jobs:
             exit 0
           fi
 
-          PR_URL=$(cat /tmp/pr-url.txt)
-          PR_NUM=$(echo "$PR_URL" | grep -oP '\d+$')
-
-          echo "Waiting for PR #$PR_NUM to merge..."
-          for i in $(seq 1 30); do
-            STATE=$(gh pr view "$PR_NUM" --json state --jq '.state')
-            if [[ "$STATE" == "MERGED" ]]; then
-              echo "PR #$PR_NUM merged!"
-              break
-            elif [[ "$STATE" == "CLOSED" ]]; then
-              echo "PR #$PR_NUM was closed without merge, skipping"
-              exit 0
-            fi
-            echo "PR state: $STATE, waiting... ($i/30)"
-            sleep 10
-          done
-
-          if [[ "$STATE" != "MERGED" ]]; then
-            echo "PR #$PR_NUM did not merge within 5 minutes, skipping AUR push"
-            exit 0
-          fi
-
           mkdir -p /home/builder/.ssh
           echo "$AUR_SSH_PRIVATE_KEY" > /home/builder/.ssh/aur_key
           chmod 600 /home/builder/.ssh/aur_key
