@@ -28,8 +28,8 @@
       "url": "https://github.com/storaged-project/blivet-gui/releases/tag/2.6.0"
     },
     "aur/ccstatusline": {
-      "version": "2.2.6",
-      "url": "https://www.npmjs.com/package/ccstatusline/v/2.2.6"
+      "version": "2.2.7",
+      "url": "https://www.npmjs.com/package/ccstatusline/v/2.2.7"
     },
     "aur/claude-code-ui": {
       "version": "1.25.2",
