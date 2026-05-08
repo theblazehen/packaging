@@ -36,6 +36,10 @@ npm = "ccstatusline"
 source = "npm"
 npm = "@shopify/cli"
 
+["aur/stagereview"]
+source = "npm"
+npm = "stagereview"
+
 # ═══════════════════════════════════════════════════════════════════
 # AUR: PyPI Packages
 # ═══════════════════════════════════════════════════════════════════

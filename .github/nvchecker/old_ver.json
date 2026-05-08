@@ -114,6 +114,10 @@
     "aur/shopify-cli": {
       "version": "3.94.3",
       "url": "https://www.npmjs.com/package/@shopify/cli/v/3.94.3"
+    },
+    "aur/stagereview": {
+      "version": "0.1.2",
+      "url": "https://www.npmjs.com/package/stagereview/v/0.1.2"
     }
   }
 }
