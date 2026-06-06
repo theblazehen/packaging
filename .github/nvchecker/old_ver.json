@@ -36,9 +36,9 @@
       "url": "https://www.npmjs.com/package/@siteboon/claude-code-ui/v/2.0.0"
     },
     "aur/code-notify": {
-      "version": "1.9.0",
-      "gitref": "refs/tags/v1.9.0",
-      "url": "https://github.com/mylee04/code-notify/releases/tag/v1.9.0"
+      "version": "1.10.0",
+      "gitref": "refs/tags/v1.10.0",
+      "url": "https://github.com/mylee04/code-notify/releases/tag/v1.10.0"
     },
     "aur/fractalart-git": {
       "version": "e741eb250054d5baeb0715fbbaeb91f8cb254eb3",
