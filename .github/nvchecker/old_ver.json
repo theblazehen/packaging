@@ -66,9 +66,9 @@
       "url": "https://www.npmjs.com/package/@openchamber/web/v/1.16.3"
     },
     "aur/ovrport-bin": {
-      "version": "1.2.2",
-      "gitref": "refs/tags/v1.2.2",
-      "url": "https://github.com/ovrport/app/releases/tag/v1.2.2"
+      "version": "1.2.3",
+      "gitref": "refs/tags/1.2.3",
+      "url": "https://github.com/ovrport/app/releases/tag/1.2.3"
     },
     "aur/promptfoo": {
       "version": "0.121.19",
