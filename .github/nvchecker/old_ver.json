@@ -116,8 +116,8 @@
       "url": "https://www.npmjs.com/package/@shopify/cli/v/4.6.1"
     },
     "aur/stagereview": {
-      "version": "0.1.4",
-      "url": "https://www.npmjs.com/package/stagereview/v/0.1.4"
+      "version": "0.1.6",
+      "url": "https://www.npmjs.com/package/stagereview/v/0.1.6"
     }
   }
 }
