@@ -26,12 +26,12 @@ makepkg -sf --noconfirm
 '''
 
 [tasks.test]
-description = "Install and smoke test"
+description = "Install and launch GUI (requires a graphical session)"
 run = '''
 #!/usr/bin/env bash
 cd "$WORKSPACE"
-sudo makepkg -si --noconfirm
-adb-gui-kit --help || echo "Installed successfully"
+makepkg -si --noconfirm
+adb-gui-kit
 '''
 
 [tasks.srcinfo]

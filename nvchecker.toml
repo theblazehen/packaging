@@ -87,9 +87,11 @@ use_max_tag = true
 
 ["aur/adb-gui-kit-bin"]
 source = "github"
-github = "Drenzzz/adb-gui-kit"
+github = "Drenzzz/ADBKit"
 use_latest_release = true
 prefix = "v"
+from_pattern = "-beta"
+to_pattern = "beta"
 
 ["aur/komac"]
 source = "github"
