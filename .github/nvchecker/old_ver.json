@@ -2,9 +2,10 @@
   "version": 2,
   "data": {
     "aur/adb-gui-kit-bin": {
-      "version": "1.3",
-      "gitref": "refs/tags/v1.3",
-      "url": "https://github.com/Drenzzz/adb-gui-kit/releases/tag/v1.3"
+      "version": "2.0.0-beta4",
+      "gitref": "refs/tags/v2.0.0-beta4",
+      "url": "https://github.com/Drenzzz/ADBKit/releases/tag/v2.0.0-beta4",
+      "creation_time": "2026-08-26T02:22:06Z"
     },
     "aur/arweave-deploy-bin": {
       "version": "1.9.0",
@@ -18,8 +19,8 @@
       "url": "https://github.com/assimelha/bdui/releases/tag/v0.2.0"
     },
     "aur/blender-mcp-git": {
-      "version": "c1d7f0e254cd1c92f2ec72d98df41337fe1b6cf5",
-      "revision": "c1d7f0e254cd1c92f2ec72d98df41337fe1b6cf5"
+      "version": "c5f35d9cc54451d785ac4c00c48bf9e98a2e8db9",
+      "revision": "c5f35d9cc54451d785ac4c00c48bf9e98a2e8db9"
     },
     "aur/blivet-gui": {
       "version": "2.6.0",
@@ -28,17 +29,18 @@
       "url": "https://github.com/storaged-project/blivet-gui/releases/tag/2.6.0"
     },
     "aur/ccstatusline": {
-      "version": "2.2.27",
-      "url": "https://www.npmjs.com/package/ccstatusline/v/2.2.27"
+      "version": "2.2.29",
+      "url": "https://www.npmjs.com/package/ccstatusline/v/2.2.29"
     },
     "aur/claude-code-ui": {
       "version": "2.0.0",
       "url": "https://www.npmjs.com/package/@siteboon/claude-code-ui/v/2.0.0"
     },
     "aur/code-notify": {
-      "version": "1.11.1",
-      "gitref": "refs/tags/v1.11.1",
-      "url": "https://github.com/mylee04/code-notify/releases/tag/v1.11.1"
+      "version": "1.13.1",
+      "gitref": "refs/tags/v1.13.1",
+      "url": "https://github.com/mylee04/code-notify/releases/tag/v1.13.1",
+      "creation_time": "2026-09-04T03:12:15Z"
     },
     "aur/fractalart-git": {
       "version": "e741eb250054d5baeb0715fbbaeb91f8cb254eb3",
@@ -62,8 +64,8 @@
       "revision": "c8d1bfe8e800082c257274f40f0f799835e155e1"
     },
     "aur/openchamber": {
-      "version": "1.18.2",
-      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.18.2"
+      "version": "1.22.2",
+      "url": "https://www.npmjs.com/package/@openchamber/web/v/1.22.2"
     },
     "aur/ovrport-bin": {
       "version": "1.2.3",
@@ -71,21 +73,22 @@
       "url": "https://github.com/ovrport/app/releases/tag/1.2.3"
     },
     "aur/promptfoo": {
-      "version": "0.122.0",
-      "url": "https://www.npmjs.com/package/promptfoo/v/0.122.0"
+      "version": "0.122.2",
+      "url": "https://www.npmjs.com/package/promptfoo/v/0.122.2"
     },
     "aur/ranger-git": {
-      "version": "08e43da12206c9fd89af429c20a26f21f825d2fc",
-      "revision": "08e43da12206c9fd89af429c20a26f21f825d2fc"
+      "version": "378640829b10696b901ee2835ac3fa1acd980aed",
+      "revision": "378640829b10696b901ee2835ac3fa1acd980aed"
     },
     "aur/scrapfetch-git": {
       "version": "9650db3a8da91ed3f38e2b942f8aaf7ac59516cb",
       "revision": "9650db3a8da91ed3f38e2b942f8aaf7ac59516cb"
     },
     "aur/slackdump-bin": {
-      "version": "4.4.2",
-      "gitref": "refs/tags/v4.4.2",
-      "url": "https://github.com/rusq/slackdump/releases/tag/v4.4.2"
+      "version": "4.4.4",
+      "gitref": "refs/tags/v4.4.4",
+      "url": "https://github.com/rusq/slackdump/releases/tag/v4.4.4",
+      "creation_time": "2026-08-19T09:24:36Z"
     },
     "aur/xmenu": {
       "version": "4.6.1",
@@ -112,12 +115,12 @@
       "url": "https://pypi.org/project/smooth-py/0.4.5/"
     },
     "aur/shopify-cli": {
-      "version": "4.6.1",
-      "url": "https://www.npmjs.com/package/@shopify/cli/v/4.6.1"
+      "version": "4.7.1",
+      "url": "https://www.npmjs.com/package/@shopify/cli/v/4.7.1"
     },
     "aur/stagereview": {
-      "version": "0.1.4",
-      "url": "https://www.npmjs.com/package/stagereview/v/0.1.4"
+      "version": "0.1.7",
+      "url": "https://www.npmjs.com/package/stagereview/v/0.1.7"
     }
   }
 }
