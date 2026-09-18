@@ -73,8 +73,8 @@
       "url": "https://github.com/ovrport/app/releases/tag/1.2.3"
     },
     "aur/promptfoo": {
-      "version": "0.123.0",
-      "url": "https://www.npmjs.com/package/promptfoo/v/0.123.0"
+      "version": "0.123.1",
+      "url": "https://www.npmjs.com/package/promptfoo/v/0.123.1"
     },
     "aur/ranger-git": {
       "version": "46e957af9762dd2fcaabfbef4d3c45c16edd1184",
