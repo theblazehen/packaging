@@ -12,21 +12,7 @@ if [[ ! -f "$PKG_DIR/.aur-files" ]]; then
 fi
 
 cd "$WORKSPACE"
-
-# Copy files listed in .aur-files (fail if missing)
-while IFS= read -r file || [[ -n "$file" ]]; do
-    # Skip empty lines and comments
-    [[ -z "$file" || "$file" == \#* ]] && continue
-    
-    if [[ ! -e "$PKG_DIR/$file" ]]; then
-        echo "ERROR: File '$file' listed in .aur-files does not exist"
-        exit 1
-    fi
-    
-    cp -r "$PKG_DIR/$file" "$WORKSPACE/"
-    echo "Copied: $file"
-done < "$PKG_DIR/.aur-files"
-
+bash "$PACKAGING_ROOT/.github/scripts/export-aur.sh" "$PKG_DIR" "$WORKSPACE"
 # Stage and commit
 jj new -m "Update package"
 git add -A

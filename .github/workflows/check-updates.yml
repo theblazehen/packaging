@@ -470,15 +470,7 @@ jobs:
             cd -
           }
 
-          while IFS= read -r file || [[ -n "$file" ]]; do
-            [[ -z "$file" || "$file" == \#* ]] && continue
-            if [[ ! -e "$file" ]]; then
-              echo "ERROR: File '$file' listed in .aur-files does not exist"
-              exit 1
-            fi
-            cp -r "$file" /tmp/aur-push/
-            echo "Copied: $file"
-          done < .aur-files
+          bash "$GITHUB_WORKSPACE/.github/scripts/export-aur.sh" "$GITHUB_WORKSPACE/aur/$PKG_NAME" /tmp/aur-push
 
           cd /tmp/aur-push
           git config user.name "github-actions[bot]"

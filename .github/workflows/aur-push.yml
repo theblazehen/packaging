@@ -4,8 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'aur/**/PKGBUILD'
-      - 'aur/**/.SRCINFO'
+      - 'aur/**'
   workflow_dispatch:
     inputs:
       packages:
@@ -13,107 +12,136 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   push-to-aur:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: ghcr.io/${{ github.repository }}/builder:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user 1001
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+      - name: Determine changed packages
+        id: changed
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          INPUT_PACKAGES: ${{ inputs.packages }}
+        run: |
+          if [[ -n "$INPUT_PACKAGES" ]]; then
+            read -r -a packages <<< "$INPUT_PACKAGES"
+          else
+            declare -A package_set=()
+            before_sha="$BEFORE_SHA"
+            if [[ -z "$before_sha" || "$before_sha" =~ ^0+$ ]]; then
+              before_sha=$(git rev-list --max-parents=0 "$GITHUB_SHA")
+            fi
+            while IFS= read -r path; do
+              [[ "$path" == aur/*/* ]] || continue
+              package="${path#aur/}"
+              package="${package%%/*}"
+              [[ -d "aur/$package" ]] && package_set["$package"]=1
+            done < <(git diff --name-only "$before_sha" "$GITHUB_SHA")
+            packages=()
+            if ((${#package_set[@]})); then
+              mapfile -t packages < <(printf '%s\n' "${!package_set[@]}" | sort)
+            fi
+          fi
+          for package in "${packages[@]}"; do
+            [[ "$package" =~ ^[A-Za-z0-9._+-]+$ ]] || { echo "ERROR: Invalid package name: $package"; exit 1; }
+            [[ -d "aur/$package" ]] || { echo "ERROR: Unknown package: $package"; exit 1; }
+          done
+          packages=$(IFS=' '; printf '%s' "${packages[*]}")
+          printf 'packages=%s\n' "$packages" >> "$GITHUB_OUTPUT"
+          echo "Packages to build and push: $packages"
+
+      - name: Build affected packages
+        env:
+          PACKAGES: ${{ steps.changed.outputs.packages }}
+        run: |
+          read -r -a packages <<< "$PACKAGES"
+          if ((${#packages[@]} == 0)); then
+            echo "No changed packages to build"
+            exit 0
+          fi
+          for package in "${packages[@]}"; do
+            echo "Building $package in the Arch builder"
+            bash .github/scripts/build-aur.sh "aur/$package"
+          done
 
       - name: Setup SSH for AUR
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur
-          chmod 600 ~/.ssh/aur
-          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
-          
-          cat >> ~/.ssh/config << 'EOF'
+          install -d -m 700 /home/builder/.ssh
+          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > /home/builder/.ssh/aur
+          chmod 600 /home/builder/.ssh/aur
+          ssh-keyscan aur.archlinux.org >> /home/builder/.ssh/known_hosts
+
+          cat >> /home/builder/.ssh/config << 'EOF'
           Host aur.archlinux.org
-            IdentityFile ~/.ssh/aur
+            IdentityFile /home/builder/.ssh/aur
             User aur
             IdentitiesOnly yes
           EOF
 
-      - name: Determine changed packages
-        id: changed
-        run: |
-          if [[ -n "${{ inputs.packages }}" ]]; then
-            packages="${{ inputs.packages }}"
-          else
-            packages=$(git diff --name-only HEAD~1 HEAD \
-              | grep '^aur/' \
-              | cut -d/ -f2 \
-              | sort -u \
-              | while read pkg; do [ -d "aur/$pkg" ] && echo "$pkg"; done \
-              | tr '\n' ' ')
-          fi
-          echo "packages=$packages" >> $GITHUB_OUTPUT
-          echo "Packages to push: $packages"
-
       - name: Push to AUR
+        env:
+          PACKAGES: ${{ steps.changed.outputs.packages }}
         run: |
-          for pkg in ${{ steps.changed.outputs.packages }}; do
-            echo "═══════════════════════════════════════════════"
+          read -r -a packages <<< "$PACKAGES"
+          for pkg in "${packages[@]}"; do
             echo "Pushing $pkg to AUR..."
-            echo "═══════════════════════════════════════════════"
-            
-            cd aur/$pkg
-            
-            # Validate .aur-files exists
-            if [[ ! -f .aur-files ]]; then
-              echo "ERROR: .aur-files not found in aur/$pkg"
+            source="$GITHUB_WORKSPACE/aur/$pkg"
+            if [[ ! -f "$source/.aur-files" ]]; then
+              echo "ERROR: .aur-files not found in $source"
               exit 1
             fi
-            
-            git clone ssh://aur@aur.archlinux.org/$pkg.git ../aur-$pkg-temp 2>/dev/null || {
+
+            temp_dir=$(mktemp -d "/tmp/aur-$pkg.XXXXXX")
+            destination="$temp_dir/repo"
+            remote="ssh://aur@aur.archlinux.org/$pkg.git"
+            if ! git clone "$remote" "$destination"; then
               echo "New package, initializing..."
-              mkdir -p ../aur-$pkg-temp
-              cd ../aur-$pkg-temp
-              git init --initial-branch=master
-              git remote add origin ssh://aur@aur.archlinux.org/$pkg.git
-              cd -
-            }
-            
-            # Copy files listed in .aur-files (fail if missing)
-            while IFS= read -r file || [[ -n "$file" ]]; do
-              # Skip empty lines and comments
-              [[ -z "$file" || "$file" == \#* ]] && continue
-              
-              if [[ ! -e "$file" ]]; then
-                echo "ERROR: File '$file' listed in .aur-files does not exist"
-                exit 1
-              fi
-              
-              cp -r "$file" ../aur-$pkg-temp/
-              echo "Copied: $file"
-            done < .aur-files
-            
-            cd ../aur-$pkg-temp
-            
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            
-            git add -A
-            
-            COMMIT_MSG=$(git -C "$GITHUB_WORKSPACE" log --format=%s -1)
-            
-            if ! git diff --staged --quiet; then
-              git commit -m "$COMMIT_MSG"
-              git push origin master
+              mkdir -p "$destination"
+              git -C "$destination" init --initial-branch=master
+              git -C "$destination" remote add origin "$remote"
+            fi
+
+            bash "$GITHUB_WORKSPACE/.github/scripts/export-aur.sh" "$source" "$destination"
+            git -C "$destination" config user.name "github-actions[bot]"
+            git -C "$destination" config user.email "github-actions[bot]@users.noreply.github.com"
+            git -C "$destination" add -A
+
+            commit_msg=$(git -C "$GITHUB_WORKSPACE" log --format=%s -1)
+            if ! git -C "$destination" diff --staged --quiet; then
+              git -C "$destination" commit -m "$commit_msg"
+              git -C "$destination" push origin master
               echo "Successfully pushed $pkg to AUR"
             else
               echo "No changes to push for $pkg"
             fi
-            
-            cd "$GITHUB_WORKSPACE"
           done
 
       - name: Summary
+        env:
+          PACKAGES: ${{ steps.changed.outputs.packages }}
         run: |
-          echo "## AUR Push Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          for pkg in ${{ steps.changed.outputs.packages }}; do
-            echo "- [$pkg](https://aur.archlinux.org/packages/$pkg)" >> $GITHUB_STEP_SUMMARY
+          echo "## AUR Push Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          read -r -a packages <<< "$PACKAGES"
+          for pkg in "${packages[@]}"; do
+            echo "- [$pkg](https://aur.archlinux.org/packages/$pkg)" >> "$GITHUB_STEP_SUMMARY"
           done
