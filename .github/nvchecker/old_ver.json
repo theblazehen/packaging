@@ -85,10 +85,10 @@
       "revision": "9650db3a8da91ed3f38e2b942f8aaf7ac59516cb"
     },
     "aur/slackdump-bin": {
-      "version": "4.4.5",
-      "gitref": "refs/tags/v4.4.5",
-      "url": "https://github.com/rusq/slackdump/releases/tag/v4.4.5",
-      "creation_time": "2026-09-14T03:23:58Z"
+      "version": "4.5.0",
+      "gitref": "refs/tags/v4.5.0",
+      "url": "https://github.com/rusq/slackdump/releases/tag/v4.5.0",
+      "creation_time": "2026-10-03T05:59:11Z"
     },
     "aur/xmenu": {
       "version": "4.6.1",
