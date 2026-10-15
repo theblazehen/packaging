@@ -55,9 +55,10 @@
       "url": "https://www.npmjs.com/package/kimaki/v/0.4.79"
     },
     "aur/komac": {
-      "version": "2.16.0",
-      "gitref": "refs/tags/v2.16.0",
-      "url": "https://github.com/russellbanks/Komac/releases/tag/v2.16.0"
+      "version": "2.17.1",
+      "gitref": "refs/tags/v2.17.1",
+      "url": "https://github.com/russellbanks/Komac/releases/tag/v2.17.1",
+      "creation_time": "2026-10-15T00:17:02Z"
     },
     "aur/lazybeads-git": {
       "version": "c8d1bfe8e800082c257274f40f0f799835e155e1",
