@@ -19,8 +19,8 @@
       "url": "https://github.com/assimelha/bdui/releases/tag/v0.2.0"
     },
     "aur/blender-mcp-git": {
-      "version": "578360f8007ce6818b1a3c8b2cfe731f9283ed45",
-      "revision": "578360f8007ce6818b1a3c8b2cfe731f9283ed45"
+      "version": "8f40787fbde8e6d8fe51c5a3553e5635fff40d2b",
+      "revision": "8f40787fbde8e6d8fe51c5a3553e5635fff40d2b"
     },
     "aur/blivet-gui": {
       "version": "2.6.0",
