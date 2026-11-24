@@ -102,10 +102,10 @@
       "url": "https://github.com/remorses/tuitube/releases/tag/tuitube%40202601102121"
     },
     "aur/caire": {
-      "version": "1.6.0",
-      "gitref": "refs/tags/v1.6.0",
-      "revision": "2ad40c328c9256b2039d964146ca215f6650737d",
-      "url": "https://github.com/esimov/caire/releases/tag/v1.6.0"
+      "version": "1.6.1",
+      "gitref": "refs/tags/v1.6.1",
+      "revision": "1fc15ebffb3ba18d8dc75ab0308d391392ff5ac6",
+      "url": "https://github.com/esimov/caire/releases/tag/v1.6.1"
     },
     "aur/yt-beats": {
       "version": "0.0.16",
